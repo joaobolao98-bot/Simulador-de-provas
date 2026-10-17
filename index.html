@@ -1,0 +1,308 @@
+
+
+Simulado acs · HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulados ACS - Agente Comunitário de Saúde</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<header class="bg-blue-900 text-white shadow-md py-5 px-4">
+  <div class="max-w-3xl mx-auto flex justify-between items-center gap-4">
+    <div>
+      <h1 class="text-xl font-bold">Simulados ACS</h1>
+      <p class="text-blue-200 text-xs">Agente Comunitário de Saúde (ESF) - Banca GL Consultoria</p>
+    </div>
+    <div id="timer-box" class="hidden bg-blue-800 border border-blue-700 px-3 py-1.5 rounded-lg text-center">
+      <span class="text-[10px] text-blue-200 block">Tempo</span>
+      <span id="timer" class="text-lg font-mono font-bold">50:00</span>
+    </div>
+  </div>
+</header>
+ 
+<main class="max-w-3xl mx-auto w-full p-4 flex-grow">
+  <!-- MENU -->
+  <section id="menu" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 my-6">
+    <h2 class="text-lg font-bold text-center mb-1">Escolha um simulado</h2>
+    <p class="text-slate-600 text-sm text-center mb-5">Cada simulado tem 10 questões. Ao clicar na resposta, você vê na hora se acertou e a explicação.</p>
+    <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+  </section>
+ 
+  <!-- PROVA -->
+  <section id="quiz" class="hidden space-y-4">
+    <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm">
+      <div>
+        <span id="sim-title" class="text-xs font-bold text-blue-700 block"></span>
+        <span id="tracker" class="text-sm font-semibold text-slate-600"></span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span id="cat" class="text-[10px] font-bold uppercase px-2.5 py-1 bg-blue-100 text-blue-800 rounded-full"></span>
+        <button onclick="toMenu()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-slate-700 font-medium cursor-pointer">Menu</button>
+      </div>
+    </div>
+    <div class="h-2 bg-slate-200 rounded-full overflow-hidden"><div id="bar" class="h-full bg-blue-600 transition-all" style="width:0%"></div></div>
+ 
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+      <h3 id="qtext" class="text-base font-medium text-slate-900 mb-5 leading-relaxed"></h3>
+      <div id="opts" class="space-y-3"></div>
+      <div id="exp" class="hidden mt-5 p-4 rounded-lg border text-sm leading-relaxed"></div>
+    </div>
+ 
+    <div class="flex justify-between">
+      <button id="prev" onclick="go(-1)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium py-2.5 px-5 rounded-lg text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Anterior</button>
+      <button id="next" onclick="go(1)" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-6 rounded-lg text-sm cursor-pointer">Próxima</button>
+    </div>
+  </section>
+ 
+  <!-- RESULTADO -->
+  <section id="result" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 my-4 space-y-5">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold">Simulado finalizado!</h2>
+      <p id="msg" class="text-slate-600 text-sm mt-1"></p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 text-center">
+      <div class="bg-slate-50 p-4 rounded-lg border border-slate-200"><span class="text-xs text-slate-500 block">Acertos</span><span id="r-score" class="text-2xl font-bold"></span></div>
+      <div class="bg-blue-50 p-4 rounded-lg border border-blue-200"><span class="text-xs text-blue-600 block">Aproveitamento</span><span id="r-pct" class="text-2xl font-bold text-blue-900"></span></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="toMenu()" class="flex-1 bg-slate-200 hover:bg-slate-300 font-semibold py-3 rounded-lg text-sm cursor-pointer">Menu principal</button>
+      <button onclick="start(curSim)" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg text-sm cursor-pointer">Refazer</button>
+    </div>
+    <div>
+      <h3 class="font-bold mb-3">Revisão das questões</h3>
+      <div id="review" class="space-y-3"></div>
+    </div>
+  </section>
+</main>
+ 
+<footer class="text-center py-5 text-xs text-slate-500">Simulados de estudo - Agente Comunitário de Saúde / GL Consultoria</footer>
+ 
+<script>
+// Banco de questões - Agente Comunitário de Saúde (ESF) - Banca GL Consultoria
+// Formato: [categoria, enunciado, resposta certa, [3 erradas], explicação]
+// A cada 10 questões seguidas forma 1 simulado automaticamente.
+const P="Língua Portuguesa", M="Matemática e Raciocínio Lógico", E="Conhecimentos Específicos";
+const BANK = [
+// ---- Simulado 01: SUS e controle social
+[P,"Em 'Vacine-se hoje!', predomina a função da linguagem:","Conativa (apelativa)",["Referencial","Emotiva","Poética"],"O texto procura levar o leitor a agir, característica da função conativa."],
+[P,"Em 'Estou morrendo de fome', há a figura de linguagem:","Hipérbole",["Metáfora","Eufemismo","Ironia"],"A hipérbole exagera a ideia para dar ênfase."],
+[M,"Um capital de R$ 1.000 aplicado a juros simples de 2% ao mês durante 5 meses rende de juros:","R$ 100",["R$ 10","R$ 110","R$ 200"],"J = C × i × t = 1.000 × 0,02 × 5 = 100."],
+[M,"Em uma comunidade de 2.000 pessoas, 15% são crianças. Quantas são crianças?","300",["150","200","350"],"0,15 × 2.000 = 300."],
+[E,"O princípio do SUS que garante o acesso de todos às ações e serviços de saúde, sem discriminação, é a:","Universalidade",["Equidade","Hierarquização","Regionalização"],"Saúde é direito de todos e dever do Estado."],
+[E,"O princípio da equidade no SUS significa:","Tratar de forma desigual os desiguais, priorizando quem mais precisa",["Tratar todos exatamente igual","Atender só quem paga","Atender apenas idosos"],"Busca reduzir desigualdades, oferecendo mais a quem tem maior necessidade."],
+[E,"A integralidade no SUS pressupõe:","Atenção ao indivíduo em todos os níveis: promoção, prevenção, tratamento e reabilitação",["Atendimento apenas de urgência","Foco só na doença","Ações só hospitalares"],"Vê a pessoa como um todo e articula as ações de saúde."],
+[E,"A Lei nº 8.080/1990 é a:","Lei Orgânica da Saúde, que organiza e regula o funcionamento do SUS",["Lei que cria o Bolsa Família","Lei do ECA","Lei da previdência"],"Dispõe sobre promoção, proteção e recuperação da saúde."],
+[E,"A Lei nº 8.142/1990 dispõe sobre:","A participação da comunidade na gestão do SUS e as transferências de recursos financeiros",["As atribuições do ACS","A vacinação obrigatória","A saúde suplementar"],"Cria as Conferências e os Conselhos de Saúde."],
+[E,"Os Conselhos de Saúde são órgãos:","Permanentes e deliberativos, com participação paritária de usuários",["Temporários e apenas consultivos","Exclusivos de médicos","Privados"],"Os usuários representam 50% dos membros. É o controle social do SUS."],
+ 
+// ---- Simulado 02: PNAB e legislação do ACS
+[P,"Um folheto que ensina como prevenir a dengue é um texto predominantemente:","Injuntivo (instrucional)",["Narrativo","Poético","Descritivo"],"Orienta e instrui o leitor sobre como agir."],
+[P,"A palavra 'infelizmente' é formada por:","Derivação prefixal e sufixal",["Composição por justaposição","Composição por aglutinação","Onomatopeia"],"in- (prefixo) + feliz + -mente (sufixo)."],
+[M,"Se 3 agentes visitam 90 casas em 5 dias, 6 agentes visitam 180 casas em:","5 dias",["10 dias","2,5 dias","6 dias"],"Regra de três composta: dobrando agentes e casas, o prazo se mantém."],
+[M,"As raízes da equação x² − 5x + 6 = 0 são:","2 e 3",["1 e 6","−2 e −3","5 e 6"],"Soma = 5 e produto = 6, logo as raízes são 2 e 3."],
+[E,"Segundo a PNAB (Portaria nº 2.436/2017), a Atenção Primária é:","Porta de entrada preferencial e ordenadora do cuidado na rede de atenção",["Serviço só para urgências","Atendimento exclusivo hospitalar","Atenção especializada de alta complexidade"],"Coordena o cuidado e organiza o acesso às demais redes."],
+[E,"A Estratégia Saúde da Família (ESF) é considerada pela PNAB:","Estratégia prioritária de expansão e consolidação da Atenção Primária",["Programa temporário","Serviço apenas de vacinação","Serviço privado"],"Reorganiza a atenção básica com foco na família e no território."],
+[E,"A equipe de Saúde da Família é composta, no mínimo, por:","Médico, enfermeiro, técnico ou auxiliar de enfermagem e agente comunitário de saúde",["Apenas médico e enfermeiro","Dentista e psicólogo","Somente agentes comunitários"],"Pode contar com outros profissionais, como a equipe de saúde bucal."],
+[E,"A Lei nº 11.350/2006 regulamenta:","As atividades de Agente Comunitário de Saúde e de Agente de Combate às Endemias",["O Sistema de Vigilância Sanitária","O Estatuto do Idoso","A Lei Orgânica da Saúde"],"Trata de atribuições, contratação e vínculo."],
+[E,"Segundo a Lei nº 11.350/2006, um requisito do ACS é:","Residir na área da comunidade em que atuar",["Ter formação superior","Morar em outro município","Ser servidor federal"],"O vínculo com a comunidade é essencial ao trabalho."],
+[E,"Não é atribuição do ACS:","Prescrever medicamentos",["Cadastrar famílias","Orientar sobre vacinas","Realizar visitas domiciliares"],"Prescrição é atividade de profissional habilitado."],
+ 
+// ---- Simulado 03: atribuições do ACS, imunização e notificação
+[P,"Em 'Os agentes visitaram as famílias', o sujeito é:","Simples: 'Os agentes'",["Oculto","Indeterminado","Inexistente"],"Está explícito e tem um só núcleo ('agentes')."],
+[P,"Assinale a frase correta quanto à concordância:","Vendem-se casas nesse bairro.",["Vende-se casas nesse bairro.","Houveram muitas visitas ontem.","Fazem três anos que me mudei."],"Na voz passiva sintética o verbo concorda com o sujeito ('casas'); 'haver' e 'fazer' (tempo) são impessoais."],
+[M,"Em um sorteio entre 20 famílias, 5 têm gestantes. A probabilidade de sortear uma família com gestante é:","1/4",["1/5","1/2","5/4"],"5/20 = 1/4."],
+[M,"A média geométrica entre 4 e 9 é:","6",["6,5","13","36"],"√(4 × 9) = √36 = 6."],
+[E,"A visita domiciliar do ACS tem por finalidade:","Acompanhar as famílias, orientar e identificar situações de risco",["Substituir a consulta médica","Cobrar taxas","Aplicar procedimentos de enfermagem"],"É o principal instrumento de vínculo entre equipe e comunidade."],
+[E,"Em relação à gestante, o ACS deve:","Acompanhar e incentivar o início precoce e a regularidade do pré-natal",["Indicar medicamentos","Realizar o parto","Desencorajar consultas"],"O pré-natal reduz riscos para a mãe e o bebê."],
+[E,"O aleitamento materno deve ser exclusivo até:","6 meses de vida",["2 meses","4 meses","1 ano"],"Depois, inicia-se a alimentação complementar, mantendo o leite materno."],
+[E,"A vacina BCG, aplicada ao nascer, previne:","As formas graves de tuberculose",["Sarampo","Hepatite A","Dengue"],"Protege principalmente contra a tuberculose miliar e meníngea."],
+[E,"A cadeia de frio das vacinas exige conservação, em geral, entre:","+2 °C e +8 °C",["−20 °C e −10 °C","+10 °C e +15 °C","0 °C e −5 °C"],"Fora dessa faixa, o imunobiológico pode perder a eficácia."],
+[E,"A notificação compulsória de doenças é:","Obrigatória para profissionais e serviços de saúde",["Facultativa","Feita só pelo paciente","Proibida sem autorização judicial"],"Permite a vigilância epidemiológica agir rapidamente."],
+ 
+// ---- Simulado 04: epidemiologia e arboviroses
+[P,"Em 'A dengue é grave; portanto, é preciso prevenir', o conectivo 'portanto' indica:","Conclusão",["Oposição","Causa","Adição"],"Introduz a consequência do que foi afirmado antes."],
+[P,"Na frase 'O ACS é o elo entre a comunidade e a equipe de saúde', a ideia central é:","O ACS faz a ligação entre a comunidade e a equipe",["O ACS substitui o médico","O ACS trabalha isolado","O ACS só cadastra famílias"],"'Elo' indica ligação entre as duas partes."],
+[M,"O valor de sen 30° é:","1/2",["√3/2","√2/2","1"],"É um valor notável da trigonometria."],
+[M,"Uma caixa d'água cúbica de 2 m de aresta tem volume de:","8 m³ (8.000 litros)",["4 m³","6 m³","16 m³"],"V = 2 × 2 × 2 = 8 m³; 1 m³ = 1.000 L."],
+[E,"O período de incubação de uma doença é:","O intervalo entre a exposição ao agente e o aparecimento dos primeiros sintomas",["O tempo de duração da cura","O tempo entre duas doses de vacina","O período de internação"],"Durante ele, a pessoa pode ainda não apresentar sintomas."],
+[E,"Vetor é:","O organismo que transporta e transmite o agente infeccioso a outro ser vivo",["Qualquer medicamento","Uma vacina","O local de tratamento"],"Ex.: o mosquito Aedes aegypti na dengue."],
+[E,"A vigilância sanitária atua sobre:","Riscos à saúde ligados a produtos, serviços e ambientes, como alimentos e estabelecimentos",["Apenas doenças transmissíveis","Só o controle de natalidade","Somente vacinas"],"Fiscaliza para prevenir riscos à população."],
+[E,"A principal forma de prevenir a dengue é:","Eliminar locais com água parada onde o mosquito se reproduz",["Tomar antibiótico","Evitar contato com pessoas","Beber água fervida apenas"],"O Aedes aegypti se reproduz em água parada limpa."],
+[E,"São sinais de alarme da dengue:","Dor abdominal intensa, vômitos persistentes e sangramentos",["Apenas coriza","Dor de ouvido","Tosse leve"],"Exigem atendimento de saúde imediato."],
+[E,"Zika e chikungunya são transmitidas pelo mesmo vetor da dengue, que é o:","Aedes aegypti",["Barbeiro","Flebotomíneo","Caramujo"],"O combate ao mosquito previne as três doenças."],
+ 
+// ---- Simulado 05: doenças de interesse em saúde pública
+[P,"Assinale a frase em que há regência e crase corretas:","Chegamos ao posto de saúde às oito horas.",["Chegamos no posto de saúde às oito horas.","Chegamos ao posto de saúde as oito horas.","Chegamos em o posto de saúde às oito horas."],"'Chegar' pede a preposição 'a'; antes de hora feminina há crase."],
+[P,"Assinale a frase em que a crase está correta:","Fui à unidade de saúde ontem.",["Fui à pé até a unidade.","Vou à visitar as famílias.","Refiro-me à elas."],"'À unidade' = a + a. Não há crase antes de palavra masculina, verbo ou pronome pessoal."],
+[M,"A solução do sistema x + y = 12 e 2x + y = 20 é:","x = 8 e y = 4",["x = 4 e y = 8","x = 6 e y = 6","x = 10 e y = 2"],"Subtraindo as equações: x = 8; logo y = 4."],
+[M,"O valor de 2³ × 2² é:","32",["16","64","10"],"Soma dos expoentes: 2⁵ = 32."],
+[E,"A doença de Chagas é transmitida principalmente pelo:","Barbeiro (triatomíneo)",["Aedes aegypti","Caramujo","Flebotomíneo"],"Causada pelo Trypanosoma cruzi, também pode ser transmitida por alimentos contaminados e de mãe para filho."],
+[E,"A esquistossomose é adquirida pelo contato com:","Água contaminada com larvas liberadas por caramujos",["Mordida de morcego","Picada de pernilongo","Alimentos mal congelados"],"O saneamento básico é a principal medida preventiva."],
+[E,"Em casos de diarreia, a medida mais importante para evitar a desidratação é:","Oferecer soro de reidratação oral e líquidos",["Suspender toda a ingestão de líquidos","Dar antibiótico sem orientação","Usar laxantes"],"Procurar a unidade de saúde se houver sinais de desidratação."],
+[E,"O sintomático respiratório, em busca ativa de tuberculose, é a pessoa com:","Tosse por três semanas ou mais",["Febre por um dia","Dor de cabeça isolada","Coriza por dois dias"],"Deve ser encaminhada para exame e avaliação."],
+[E,"A hanseníase se manifesta, entre outros sinais, por:","Manchas na pele com perda de sensibilidade",["Manchas que coçam muito e somem em horas","Tosse seca","Dor ao urinar"],"Tem cura, e o tratamento é gratuito no SUS."],
+[E,"Sobre as hepatites virais, é correto afirmar:","Existe vacina para a hepatite B",["Todas se transmitem pelo ar","Não há medidas de prevenção","A hepatite A é transmitida por sangue apenas"],"A hepatite A é fecal-oral, ligada a água e alimentos contaminados."],
+ 
+// ---- Simulado 06: raiva, tétano, crônicas e ISTs
+[P,"Assinale a frase pontuada corretamente:","Maria, agente de saúde, visitou a casa.",["Maria agente, de saúde visitou a casa.","Maria, agente de saúde visitou, a casa.","Maria agente de saúde, visitou a casa."],"O aposto explicativo fica entre vírgulas."],
+[P,"Assinale a grafia correta:","hipertensão",["hipertenção","ipertensão","hipertensaõ"],"A palavra deriva de 'tensão', com 's' e 'ão'."],
+[M,"A razão entre 8 e 20, na forma simplificada, é:","2/5",["4/5","1/2","3/5"],"8/20 dividido por 4 = 2/5."],
+[M,"Um produto de R$ 150 recebe desconto de 20%. O novo preço é:","R$ 120",["R$ 130","R$ 110","R$ 100"],"20% de 150 = 30; 150 − 30 = 120."],
+[E,"Em caso de mordedura por animal suspeito de raiva, o primeiro cuidado é:","Lavar o ferimento com água corrente e sabão e procurar a unidade de saúde",["Apenas passar álcool","Fechar o ferimento com curativo apertado","Aguardar sem fazer nada"],"A avaliação decide sobre soro e vacina antirrábica."],
+[E,"A principal forma de prevenir o tétano é:","Manter a vacinação em dia (dT)",["Evitar luz solar","Usar repelente","Tomar vitaminas"],"A bactéria entra por ferimentos contaminados."],
+[E,"Pressão arterial persistentemente elevada caracteriza:","Hipertensão arterial",["Diabetes","Anemia","Hipotensão"],"Em geral, valores iguais ou acima de 140/90 mmHg, confirmados em medições repetidas."],
+[E,"São sinais clássicos do diabetes:","Muita sede, muita urina, fome excessiva e perda de peso",["Tosse e coriza","Dor de ouvido","Manchas pelo corpo"],"O acompanhamento e a adesão ao tratamento previnem complicações."],
+[E,"A sífilis é causada pela bactéria:","Treponema pallidum",["Vibrio cholerae","Mycobacterium leprae","Clostridium tetani"],"Pode ser tratada com penicilina; na gestação, o tratamento evita a sífilis congênita."],
+[E,"O HIV NÃO se transmite por:","Abraço e compartilhamento de talheres",["Relação sexual sem preservativo","Compartilhamento de seringas","Transmissão vertical (da mãe para o bebê)"],"A transmissão ocorre por sangue, secreções sexuais e leite materno ou gestação."],
+ 
+// ---- Simulado 07: ISTs, saneamento e saúde mental
+[P,"Em 'Se vacine; a proteção é de todos', temos como recurso de coesão:","O ponto e vírgula, que liga ideias relacionadas",["Um erro de pontuação","Um verbo auxiliar","Uma preposição"],"O ponto e vírgula separa orações com relação de sentido próxima."],
+[P,"Assinale a palavra com acentuação correta:","farmácia",["farmacia","fármacia","farmácía"],"É paroxítona terminada em ditongo, e por isso leva acento."],
+[M,"Se 4 agentes concluem um trabalho em 6 dias, 3 agentes, no mesmo ritmo, concluem em:","8 dias",["4,5 dias","9 dias","7 dias"],"Grandezas inversamente proporcionais: 4 × 6 = 3 × x, logo x = 8."],
+[M,"Sendo f(x) = 2x + 3, o valor de f(4) é:","11",["8","14","9"],"2 × 4 + 3 = 11."],
+[E,"A vacina contra o HPV é indicada principalmente para:","Crianças e adolescentes, antes do início da vida sexual",["Somente idosos","Apenas gestantes","Somente quem já tem verrugas"],"Previne cânceres e verrugas associados ao vírus, como o de colo do útero."],
+[E,"Para tornar a água de beber mais segura em casa, deve-se:","Filtrar, ferver ou usar hipoclorito de sódio conforme orientação, e manter a vasilha tampada",["Beber direto da torneira sempre","Guardar em recipientes abertos","Usar água parada de poças"],"O hipoclorito exige tempo de contato (cerca de 30 minutos) antes do consumo."],
+[E,"Diante de uma pessoa com sinais de intenso sofrimento psíquico ou risco de suicídio, o ACS deve:","Escutar sem julgamentos e encaminhar à equipe e à rede de atenção",["Minimizar o problema","Contar o caso a vizinhos","Prometer sigilo absoluto mesmo diante de risco"],"Em risco imediato, acione o SAMU (192) ou o CVV (188), conforme o caso."],
+[E,"A Rede de Atenção Psicossocial (RAPS) inclui:","Os Centros de Atenção Psicossocial (CAPS), a Atenção Básica e serviços de urgência",["Apenas hospitais psiquiátricos","Somente consultórios particulares","Só escolas"],"A atenção é comunitária e em liberdade, articulada em rede."],
+[E,"A principal medida de prevenção da febre amarela é:","A vacinação",["Evitar o contato com animais domésticos","Usar máscara apenas","Beber água filtrada"],"A doença é transmitida por mosquitos e pode ser grave."],
+[E,"O sarampo é prevenido pela vacina:","Tríplice viral",["BCG","dT","Pentavalente"],"A vacina também protege contra caxumba e rubéola."]
+];
+ 
+const SIZE = 10;
+const TITLES = [
+  "SUS, Leis 8.080/90 e 8.142/90", "PNAB, ESF e Lei 11.350/2006", "Atribuições do ACS, Imunização e Notificação",
+  "Epidemiologia e Arboviroses", "Doenças de Interesse em Saúde Pública", "Raiva, Tétano, Crônicas e ISTs",
+  "ISTs, Saneamento e Saúde Mental"
+];
+ 
+const FIXED = Math.floor(BANK.length / SIZE);
+const DURATION = 50 * 60;
+ 
+let curSim = 1, Q = [], cur = 0, answers = [], timer = null, timeLeft = DURATION;
+const $ = id => document.getElementById(id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+ 
+// Monta o menu
+(function () {
+  let h = "";
+  for (let s = 1; s <= FIXED; s++) {
+    h += `<button onclick="start(${s})" class="p-4 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-lg text-left cursor-pointer">
+      <span class="font-bold text-blue-900 block">Simulado ${String(s).padStart(2, "0")}</span>
+      <span class="text-xs text-blue-700">${TITLES[s - 1] || "Questões variadas"}</span></button>`;
+  }
+  h += `<button onclick="start(0)" class="p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-left cursor-pointer">
+      <span class="font-bold text-emerald-900 block">Simulado Aleatório</span>
+      <span class="text-xs text-emerald-700">10 questões sorteadas de todo o banco (${BANK.length})</span></button>`;
+  $("menu-grid").innerHTML = h;
+})();
+ 
+function start(sim) {
+  curSim = sim;
+  const raw = sim === 0 ? shuffle(BANK).slice(0, SIZE) : BANK.slice((sim - 1) * SIZE, sim * SIZE);
+  // embaralha as alternativas de cada questão
+  Q = raw.map(r => ({
+    cat: r[0], q: r[1], exp: r[4],
+    opts: shuffle([{ t: r[2], ok: true }, ...r[3].map(t => ({ t, ok: false }))])
+  }));
+  answers = Array(Q.length).fill(null);
+  cur = 0; timeLeft = DURATION;
+  $("menu").classList.add("hidden"); $("result").classList.add("hidden");
+  $("quiz").classList.remove("hidden"); $("timer-box").classList.remove("hidden");
+  $("sim-title").textContent = sim === 0 ? "Simulado Aleatório" : `Simulado ${String(sim).padStart(2, "0")} - ${TITLES[sim - 1] || ""}`;
+  clearInterval(timer);
+  timer = setInterval(tick, 1000); tick(true);
+  render();
+}
+ 
+function tick(first) {
+  if (!first) timeLeft--;
+  if (timeLeft <= 0) { finish(); return; }
+  const m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+  $("timer").textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+ 
+function render() {
+  const q = Q[cur], ans = answers[cur];
+  $("tracker").textContent = `Questão ${cur + 1} de ${Q.length}`;
+  $("cat").textContent = q.cat;
+  $("qtext").textContent = q.q;
+  $("bar").style.width = `${((cur + (ans !== null ? 1 : 0)) / Q.length) * 100}%`;
+ 
+  const box = $("opts"); box.innerHTML = "";
+  q.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    let cls = "w-full text-left p-4 rounded-lg border text-sm flex items-start gap-3 transition ";
+    if (ans === null) cls += "border-slate-200 bg-white hover:bg-slate-50 cursor-pointer";
+    else if (o.ok) cls += "border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500";
+    else if (i === ans) cls += "border-rose-500 bg-rose-50 text-rose-900 ring-1 ring-rose-500";
+    else cls += "border-slate-200 bg-white opacity-60";
+    b.className = cls;
+    const mark = ans === null ? "" : o.ok ? " ✔" : i === ans ? " ✘" : "";
+    const lt = document.createElement("span"); lt.className = "font-semibold"; lt.textContent = String.fromCharCode(65 + i) + ")";
+    const tx = document.createElement("span"); tx.className = "flex-grow"; tx.textContent = o.t + mark;
+    b.append(lt, tx);
+    if (ans === null) b.onclick = () => pick(i);
+    else b.disabled = true;
+    box.appendChild(b);
+  });
+ 
+  const ex = $("exp");
+  if (ans === null) ex.classList.add("hidden");
+  else {
+    const right = q.opts[ans].ok;
+    ex.className = "mt-5 p-4 rounded-lg border text-sm leading-relaxed " + (right ? "bg-emerald-50 border-emerald-200 text-emerald-900" : "bg-rose-50 border-rose-200 text-rose-900");
+    const letter = String.fromCharCode(65 + q.opts.findIndex(o => o.ok));
+    ex.textContent = (right ? "Correto! " : `Errado. A resposta certa é a letra ${letter}. `) + q.exp;
+  }
+ 
+  $("prev").disabled = cur === 0;
+  const nb = $("next");
+  const last = cur === Q.length - 1;
+  nb.textContent = last ? "Finalizar" : "Próxima";
+  nb.className = (last ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700") + " text-white font-medium py-2.5 px-6 rounded-lg text-sm cursor-pointer";
+}
+ 
+function pick(i) { answers[cur] = i; render(); }
+function go(d) {
+  if (d > 0 && cur === Q.length - 1) { finish(); return; }
+  cur = Math.max(0, Math.min(Q.length - 1, cur + d)); render();
+}
+ 
+function finish() {
+  clearInterval(timer);
+  $("quiz").classList.add("hidden"); $("timer-box").classList.add("hidden"); $("result").classList.remove("hidden");
+  const hits = Q.filter((q, i) => answers[i] !== null && q.opts[answers[i]].ok).length;
+  const pct = Math.round(hits / Q.length * 100);
+  $("r-score").textContent = `${hits} / ${Q.length}`;
+  $("r-pct").textContent = pct + "%";
+  $("msg").textContent = pct >= 70 ? "Ótimo desempenho! Continue assim." : pct >= 50 ? "Bom caminho. Revise os erros abaixo." : "Vale revisar o conteúdo e refazer o simulado.";
+ 
+  const rv = $("review"); rv.innerHTML = "";
+  Q.forEach((q, i) => {
+    const a = answers[i], ok = a !== null && q.opts[a].ok;
+    const c = q.opts.find(o => o.ok).t;
+    const d = document.createElement("div");
+    d.className = "p-4 rounded-lg border text-sm space-y-1 " + (ok ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200");
+    const l1 = document.createElement("div"); l1.className = "font-semibold"; l1.textContent = `${i + 1}. ${q.q}`;
+    const l2 = document.createElement("div"); l2.textContent = "Sua resposta: " + (a === null ? "não respondida" : q.opts[a].t);
+    const l3 = document.createElement("div"); l3.textContent = "Resposta certa: " + c;
+    const l4 = document.createElement("div"); l4.className = "text-slate-700"; l4.textContent = "Explicação: " + q.exp;
+    d.append(l1, l2, l3, l4); rv.appendChild(d);
+  });
+}
+ 
+function toMenu() {
+  clearInterval(timer);
+  ["quiz", "result", "timer-box"].forEach(id => $(id).classList.add("hidden"));
+  $("menu").classList.remove("hidden");
+}
+ 
+</script>
+ 
+</body>
+</html>
+ 
+Claude terminou a resposta
