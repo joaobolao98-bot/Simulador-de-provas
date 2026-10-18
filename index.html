@@ -3,9 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulados de Concursos</title>
+<title>Simulados Transpetro - Nível Médio e Superior</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <style>
+/* Cores padrão aplicadas dinamicamente via JS/Inline */
 .th-hd{background:var(--d)} .th-sub{color:var(--s)} .th-box{background:var(--m);border:1px solid var(--b)}
 .th-acc{color:var(--t)} .th-chip{background:var(--l);color:var(--t)} .th-bar{background:var(--m)}
 .th-btn{background:var(--m)} .th-btn:hover{background:var(--h)}
@@ -14,14 +15,14 @@
 </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
-<header class="th-hd text-white shadow-md py-5 px-4">
+<header id="header-main" class="text-white shadow-md py-5 px-4" style="background:#1e3a8a;">
   <div class="max-w-3xl mx-auto flex justify-between items-center gap-4">
     <div>
-      <h1 class="text-xl font-bold cursor-pointer" onclick="home()">Simulados de Concursos</h1>
-      <p id="sub" class="th-sub text-xs"></p>
+      <h1 class="text-xl font-bold cursor-pointer" onclick="home()">Simulados Transpetro</h1>
+      <p id="sub" class="text-blue-200 text-xs">Preparatório Oficial para Nível Médio e Superior</p>
     </div>
-    <div id="timer-box" class="hidden th-box px-3 py-1.5 rounded-lg text-center">
-      <span class="text-[10px] th-sub block">Tempo</span>
+    <div id="timer-box" class="hidden px-3 py-1.5 rounded-lg text-center bg-blue-700 border border-blue-500">
+      <span class="text-[10px] text-blue-200 block">Tempo</span>
       <span id="timer" class="text-lg font-mono font-bold">50:00</span>
     </div>
   </div>
@@ -38,7 +39,7 @@
       </div>
       <div class="flex items-center gap-2 shrink-0">
         <span id="cat" class="text-[10px] font-bold uppercase px-2.5 py-1 th-chip rounded-full"></span>
-        <button onclick="openMod(mi)" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-slate-700 font-medium cursor-pointer">Sair</button>
+        <button onclick="home()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-slate-700 font-medium cursor-pointer">Sair</button>
       </div>
     </div>
     <div class="h-2 bg-slate-200 rounded-full overflow-hidden"><div id="bar" class="h-full th-bar transition-all" style="width:0%"></div></div>
@@ -63,43 +64,201 @@
       <div class="th-soft p-4 rounded-lg"><span class="text-xs th-acc block">Aproveitamento</span><span id="r-pct" class="text-2xl font-bold th-acc"></span></div>
     </div>
     <div class="flex gap-3">
-      <button onclick="openMod(mi)" class="flex-1 bg-slate-200 hover:bg-slate-300 font-semibold py-3 rounded-lg text-sm cursor-pointer">Voltar aos simulados</button>
+      <button onclick="home()" class="flex-1 bg-slate-200 hover:bg-slate-300 font-semibold py-3 rounded-lg text-sm cursor-pointer">Voltar aos simulados</button>
       <button onclick="start(curSim)" class="flex-1 th-btn text-white font-semibold py-3 rounded-lg text-sm cursor-pointer">Refazer</button>
     </div>
     <div><h3 class="font-bold mb-3">Revisão das questões</h3><div id="review" class="space-y-3"></div></div>
   </section>
 </main>
  
-<footer class="text-center py-5 text-xs text-slate-500">Simulados de estudo. Confira normas e valores nas fontes oficiais.</footer>
+<footer class="text-center py-5 text-xs text-slate-500">Simulado Transpetro - Conforme Editais Oficiais.</footer>
  
 <script>
 const P="Língua Portuguesa", M="Matemática e Raciocínio Lógico", I="Noções de Informática", E="Conhecimentos Específicos";
- 
-// ===== DADOS: cada módulo = cargo + banca + tipo de questões. Cada 'size' questões seguidas formam 1 simulado. =====
+
+const THEMES = {
+  azul: { d: '#1e3a8a', s: '#93c5fd', m: '#3b82f6', h: '#2563eb', l: '#eff6ff', b: '#bfdbfe', t: '#1e40af' },
+  verde: { d: '#065f46', s: '#a7f3d0', m: '#059669', h: '#047857', l: '#ecfdf5', b: '#a7f3d0', t: '#064e3b' }
+};
+
 const MODS = [
 {
-  tema:"azul", cargo:"Agente Comunitário de Saúde (ESF)", banca:"GL Consultoria", nome:"Questões extensas (estilo prova)", size:10,
-  titles:["SUS, Controle Social, PNAB e ACS", "Imunização, Atribuições e Doenças", "Saneamento, Saúde Mental, Crônicas e Ética", "Epidemiologia, Vigilância e Doenças por Vetores", "Doenças Infecciosas e Imunização", "Saúde da Mulher, Criança e Idoso, ISTs e Normas do ACS"],
+  tema:"azul", cargo:"Técnico(a) de Administração e Controle Júnior", banca:"Cesgranrio / Transpetro", nome:"Nível Médio - Conhecimentos Básicos e Específicos", size:6,
+  time: 3600,
   bank:[
-// ---- Simulado 01: SUS, controle social, PNAB e ACS
-[P,"Leia o texto a seguir.\n\nA Atenção Primária à Saúde é o primeiro contato da população com o sistema de saúde. Quando bem estruturada, resolve a maior parte dos problemas de saúde da comunidade, evita internações desnecessárias e reduz custos. Nesse cenário, o agente comunitário de saúde, por viver na própria comunidade, funciona como elo entre as famílias e a equipe, levando informações em ambas as direções.\n\nCom base no texto, é correto afirmar que o agente comunitário de saúde:","contribui para que as informações circulem entre as famílias e a equipe de saúde.",["substitui os demais profissionais da equipe de saúde.","atua exclusivamente em ambiente hospitalar.","é o responsável pela decisão sobre as internações."],"O texto o descreve como 'elo' que leva informações nos dois sentidos."],
-[P,"Assinale a alternativa que apresenta frase redigida de acordo com a norma-padrão da língua portuguesa:","A equipe de saúde recomendou às famílias que levassem as crianças à unidade para vacinação.",["A equipe de saúde recomendou as famílias que levassem as crianças a unidade para vacinação.","A equipe de saúde recomendou à famílias que levassem as crianças à unidade para vacinação.","A equipe de saúde recomendou às famílias que levassem as crianças à unidade à partir de segunda."],"'Às famílias' e 'à unidade' levam crase (preposição + artigo). Não há crase antes de 'partir' nem antes de plural sem artigo ('à famílias')."],
-[M,"Uma equipe de saúde da família acompanha 1.200 famílias. Na primeira semana do mês, os agentes visitaram 15% delas. Na segunda semana, visitaram 25% das famílias que ainda não tinham sido visitadas. Ao final das duas semanas, o total de famílias visitadas foi de:","435",["300","480","375"],"15% de 1.200 = 180. Restam 1.020; 25% de 1.020 = 255. Total: 180 + 255 = 435."],
-[M,"Uma unidade de saúde consome 3 litros de álcool em gel a cada 5 dias. Mantido o mesmo ritmo de consumo, a quantidade necessária para 30 dias é de:","18 litros",["15 litros","20 litros","9 litros"],"30 dias equivalem a 6 períodos de 5 dias; 6 × 3 = 18 litros."],
-[E,"Sobre os princípios e diretrizes do Sistema Único de Saúde (SUS), analise as afirmativas a seguir.\n\nI. A universalidade garante a todos os cidadãos o acesso às ações e aos serviços de saúde.\nII. A equidade propõe tratar todas as pessoas de forma idêntica, sem considerar as diferenças de necessidade.\nIII. A participação da comunidade na gestão do SUS é exercida por meio dos Conselhos e das Conferências de Saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II.","Apenas I e III.","I, II e III."],"A equidade trata de forma desigual os desiguais, priorizando quem mais precisa; por isso a afirmativa II é falsa."],
-[E,"Em uma reunião do Conselho Municipal de Saúde, representantes dos usuários, dos trabalhadores e dos gestores discutiram o plano municipal de saúde. Esse espaço de participação, previsto na Lei nº 8.142/1990, caracteriza-se por ser:","permanente e deliberativo, com os usuários representando metade dos membros.",["temporário e apenas consultivo, sem poder de decisão.","exclusivo de gestores e prestadores de serviço.","privado e dependente de autorização judicial."],"O Conselho de Saúde é órgão colegiado permanente e deliberativo, com composição paritária (50% de usuários)."],
-[E,"Maria procura a unidade básica de saúde com febre persistente. A equipe a avalia, resolve o caso e, quando necessário, a encaminha a outro ponto da rede, mantendo o acompanhamento. Segundo a PNAB (Portaria nº 2.436/2017), esse exemplo ilustra a função de:","coordenar o cuidado e ordenar a rede de atenção à saúde.",["atender apenas casos de urgência hospitalar.","oferecer cuidado fragmentado, sem vínculo com o usuário.","substituir os demais pontos da rede de atenção."],"A APS é a porta de entrada preferencial, coordena o cuidado e ordena o acesso à rede."],
-[E,"Em relação às atividades do agente comunitário de saúde (Lei nº 11.350/2006), analise as afirmativas a seguir.\n\nI. O ACS deve residir na área da comunidade em que atuar.\nII. Cabe ao ACS prescrever medicamentos aos moradores da microárea.\nIII. O ACS realiza visitas domiciliares e orienta sobre a prevenção de doenças e a promoção da saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"Prescrever medicamentos não é atribuição do ACS; a afirmativa II é falsa."],
-[E,"Ao iniciar o trabalho em uma microárea, o agente comunitário de saúde percorre as ruas, identifica as famílias, registra as moradias, as condições de saneamento e os grupos prioritários (gestantes, crianças, idosos e pessoas com doenças crônicas). Essa atividade corresponde, principalmente, ao:","cadastramento das famílias e ao mapeamento do território.",["tratamento clínico das doenças identificadas.","procedimento de aplicação de vacinas.","processo de emissão de atestados médicos."],"O cadastro e o mapeamento orientam o planejamento das ações da equipe."],
-[E,"Durante uma visita domiciliar, o ACS identifica um morador com sintomas de doença de notificação compulsória. A conduta mais adequada é:","comunicar imediatamente a equipe de saúde, para que a notificação e as medidas de vigilância sejam realizadas.",["aguardar que o morador procure a unidade por conta própria.","orientar que ele não procure atendimento para evitar exames.","divulgar o caso entre os vizinhos para alertar a comunidade."],"A notificação é obrigatória e permite à vigilância agir rapidamente, respeitando o sigilo."],
+    [P, "Texto de apoio:\n\n'O caminho do petróleo do poço até virar combustível no carro das pessoas é longo e complexo. Começa na procura: acertar onde furar e encontrar petróleo exige conhecimento técnico e bastante investimento.'\n\nCom base no texto, é correto afirmar que:", "a atividade exploratória de petróleo é complexa e envolve riscos e incertezas técnicas.", ["a localização de reservas é garantida pelo uso de equipes experientes.", "o refino do petróleo ocorre diretamente nos poços de extração.", "o transporte dispensa o uso de dutos e refinarias."], "O texto destaca que achar petróleo não é certo, exigindo alto investimento e conhecimento."],
+    [M, "Uma distribuidora aplicou R$ 2.000,00 a juros simples de 1,5% ao mês durante 8 meses. O valor dos juros acumulados foi de:", "R$ 240,00", ["R$ 120,00", "R$ 300,00", "R$ 2.240,00"], "J = C * i * t = 2000 * 0,015 * 8 = 240."],
+    [I, "No MS Excel 2010, a célula I1 possui a fórmula '=$G$1+H1'. Ao copiar o conteúdo para I3, sabendo que G1 vale 7 e H3 vale 5, o valor gerado em I3 será:", "12", ["16", "22", "25"], "A referência absoluta '$G$1' fixa o valor 7. A relativa 'H1' vira 'H3' (5). Logo, 7 + 5 = 12."],
+    [E, "De acordo com a CLT, o pagamento dos salários mensais dos empregados deve ocorrer, no máximo, até o:", "quinto dia útil do mês seguinte ao vencido.", ["último dia do mês trabalhado.", "primeiro dia útil do mês corrente.", "décimo dia útil do mês vencido."], "Art. 459 da CLT estabelece o limite até o quinto dia útil do mês subsequente."],
+    [E, "A armazenagem eficiente de materiais em uma organização exige boas práticas operacionais. Uma diretriz correta é:", "organizar os materiais em instalações que possibilitem rápida movimentação e otimização do fluxo.", ["ocupar 100% do espaço bloqueando corredores de circulação.", "posicionar matérias-primas longe das áreas de consumo.", "manter inventário manual sem padronização."], "Instalações devem garantir fluxo ágil, segurança e eficiência na movimentação."],
+    [E, "No atendimento ao público e relacionamento com clientes, a ferramenta focada em centralizar canais diretos de comunicação e registro de ocorrências é o:", "SAC (Serviço de Atendimento ao Consumidor).", ["PROCON.", "Balanço Patrimonial.", "DRE."], "O SAC atua como canal direto de comunicação com os clientes."]
+  ]
+},
+{
+  tema:"verde", cargo:"Profissional de Nível Superior - Júnior", banca:"Fundação Cesgranrio / Transpetro", nome:"Nível Superior - Gestão, Governança e Projetos", size:6,
+  time: 5400,
+  bank:[
+    [P, "Texto de apoio:\n\n'A complexidade inerente à gestão logística e de infraestrutura energética exige capacidade de adaptação contínua frente às oscilações de mercado e metas de descarbonização.'\n\nConforme o texto, a estratégia corporativa requer:", "equilíbrio dinâmico entre transição energética e segurança de suprimento.", ["foco absoluto em corte de custos sem critérios ambientais.", "isolamento do mercado interno em crises globais.", "substituição imediata de toda infraestrutura fóssil."], "O texto aponta a necessidade de conciliar metas de descarbonização com eficiência e segurança."],
+    [M, "Um projeto exige investimento inicial de R$ 1.000.000,00 e gera fluxos de caixa de R$ 350.000,00 por 4 anos. Com TMA de 10% a.a. (fator de anuidade = 3,17), o VPL é:", "R$ 109.500,00", ["R$ -50.000,00", "R$ 400.000,00", "R$ 85.000,00"], "VPL = -1.000.000 + (350.000 * 3,17) = 109.500."],
+    [E, "Na matriz SWOT (FOFA), utilizada no planejamento estratégico corporativo, os fatores internos da organização compreendem:", "as forças (strengths) e as fraquezas (weaknesses).", ["as oportunidades e ameaças do ambiente externo.", "apenas o fluxo de caixa livre descontado.", "as variáveis macroeconômicas e regulatórias."], "Forças e fraquezas formam o ambiente interno; oportunidades e ameaças, o externo."],
+    [E, "A integração de critérios ESG na gestão empresarial moderna abrange pilares fundamentais. No tocante à Governança Corporativa, destaca-se a:", "prestação de contas transparente (accountability) aos acionistas e partes interessadas.", ["centralização total das decisões no acionista majoritário.", "omissão de dados contábeis complexos.", "substituição da auditoria por campanhas de marketing."], "Accountability e transparência são pilares essenciais da governança."],
+    [E, "No gerenciamento de projetos segundo o PMBOK, a Estrutura Analítica do Projeto (EAP/WBS) tem como principal finalidade:", "decompor o escopo total do projeto em entregas menores e gerenciáveis.", ["definir a precedência cronológica exata de tarefas.", "substituir o orçamento financeiro.", "mapear exclusivamente riscos cambiais."], "A EAP decompõe hierarquicamente o escopo do projeto em entregas gerenciáveis."],
+    [E, "A movimentação de petróleo por dutos (oleodutos e polidutos) apresenta vantagens comparativas marcantes, destacando-se:", "a alta capacidade de movimentação contínua de grandes volumes com baixo custo unitário a longo prazo.", ["a flexibilidade total de desvio de rotas para o varejo urbano.", "a ausência de investimentos iniciais de capital.", "a velocidade de entrega instantânea de pequenos lotes."], "Dutos são ideais para grandes volumes contínuos com baixo custo operacional unitário."]
+  ]
+}
+];
  
-// ---- Simulado 02: imunização, atribuições e doenças
-[P,"Leia o texto a seguir.\n\nA vacinação é uma das medidas de saúde pública de melhor custo-benefício. Doenças como a poliomielite e o sarampo foram controladas graças à imunização em massa. No entanto, a queda nas coberturas vacinais, impulsionada pela desinformação, ameaça esses avanços e permite o retorno de doenças que já estavam sob controle.\n\nSegundo o texto, a queda nas coberturas vacinais:","pode provocar o retorno de doenças que já estavam controladas.",["é consequência do controle completo das doenças.","resulta do excesso de informação científica.","não interfere na saúde coletiva."],"O texto afirma que a queda 'permite o retorno de doenças que já estavam sob controle'."],
-[P,"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão:","Devem ser realizadas visitas domiciliares semanais às famílias de risco.",["Deve ser realizado visitas domiciliares semanais às famílias de risco.","Haviam famílias em situação de risco na microárea.","Fazem dois meses que o agente iniciou o cadastramento."],"O verbo acompanha o sujeito 'visitas' (plural). 'Haver' (existir) e 'fazer' (tempo) são impessoais."],
-[M,"Uma campanha de vacinação atendeu 840 crianças em 7 dias, com o mesmo número de atendimentos por dia. Mantido esse ritmo, o número de crianças atendidas em 12 dias será de:","1.440",["1.260","1.200","1.680"],"840 ÷ 7 = 120 por dia; 120 × 12 = 1.440."],
-[M,"Um agente comunitário registrou o número de visitas realizadas em cinco dias: 12, 15, 9, 15 e 14. A média, a mediana e a moda desse conjunto são, respectivamente:","13, 14 e 15.",["13, 15 e 14.","14, 13 e 15.","13, 12 e 15."],"Soma = 65, média = 13. Ordenando: 9, 12, 14, 15, 15; a mediana é 14 e a moda é 15."],
-[E,"Em uma unidade de saúde, a geladeira de vacinas ficou desligada durante a noite e a temperatura saiu da faixa de +2 °C a +8 °C. Quanto à conservação dos imunobiológicos (cadeia de frio), a conduta correta é:","isolar os imunobiológicos, comunicar a coordenação e aguardar avaliação técnica antes de qualquer uso.",["usar normalmente, pois a variação é irrelevante.","descartar tudo sem registrar a ocorrência.","congelar as vacinas para preservá-las."],"Variações de temperatura podem comprometer a eficácia; a decisão é técnica e deve ser registrada."],
-[E,"Sobre o aleitamento materno e a alimentação complementar, analise as afirmativas a seguir.\n\nI. Até os seis meses de idade, o bebê deve receber leite materno exclusivo.\nII. A partir dos seis meses, inicia-se a alimentação complementar, mantendo-se o leite materno.\nIII. Água e chás devem ser oferecidos desde o primeiro mês para evitar cólicas.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Antes dos seis meses, o leite materno exclusivo supre as necessidades do bebê, inclusive de líquidos."],
-[E,"Joana, de 22 anos, está grávida de 10 semanas e ainda não iniciou o pré-natal, pois acredita que só precisa consultar perto do parto. A orientação mais adequada do agente comunitário de saúde é:","explicar a importância do início precoce do pré-natal e ajudar a agendar a primeira consulta na unidade.",["concordar e aguardar o final da gestação.","sugerir que ela use vitaminas por conta própria.","orientar que procure atendimento apenas se sentir dor."],"O pré-natal precoce reduz riscos para a mãe e para o bebê."],
-[E,"Sobre a dengue, analise as afirmativas a seguir.\n\nI. A eliminação de água parada é a principal medida de prevenção.\nII. Dor abdominal intensa e vômitos persistentes são sinais de alarme.\nIII. O ácido acetilsalicílico (AAS) é recomendado para baixar a febre.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"O AAS é contraindicado na suspeita de dengue, pelo risco de sangramento."],
-[E,"Em visita domiciliar, o ACS encontra um morador com tosse há mais de três semanas, febre no fim da tarde e emagrecimento. A conduta adequada é:","encaminhá-lo à unidade de saúde para investigação de tuberculose e comunicar a equipe.",["orientar apenas o uso de xarope caseiro.","aguardar a tosse passar espontaneamente.","dizer que se trata de alergia e dispensar a avaliação."],"Tosse por três semanas
+let curSim = 0, curQ = 0, score = 0, answers = [], timerInterval, timeLeft = 3000;
+ 
+function applyTheme(temaKey) {
+  let th = THEMES[temaKey] || THEMES.azul;
+  let r = document.documentElement;
+  r.style.setProperty('--d', th.d);
+  r.style.setProperty('--s', th.s);
+  r.style.setProperty('--m', th.m);
+  r.style.setProperty('--h', th.h);
+  r.style.setProperty('--l', th.l);
+  r.style.setProperty('--b', th.b);
+  r.style.setProperty('--t', th.t);
+  document.getElementById('header-main').style.background = th.d;
+}
+
+function home() {
+  clearInterval(timerInterval);
+  applyTheme('azul');
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('timer-box').classList.add('hidden');
+  document.getElementById('menu').classList.remove('hidden');
+  renderMenu();
+}
+ 
+function renderMenu() {
+  let h = `<h2 class="text-xl font-bold mb-4 text-slate-800">Selecione o Simulado Transpetro</h2><div class="space-y-4">`;
+  MODS.forEach((m, i) => {
+    let isVerde = m.tema === 'verde';
+    let borderColor = isVerde ? 'border-emerald-200 bg-emerald-50/30' : 'border-blue-200 bg-blue-50/30';
+    let badgeColor = isVerde ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800';
+    h += `<div class="p-5 rounded-xl cursor-pointer transition shadow-sm border ${borderColor} hover:brightness-95" onclick="start(${i})">
+      <div class="flex justify-between items-start">
+        <div>
+          <span class="text-xs font-bold uppercase px-2.5 py-1 rounded-full ${badgeColor}">${m.banca}</span>
+          <h3 class="font-bold text-lg mt-2 text-slate-900">${m.cargo}</h3>
+          <p class="text-xs text-slate-600 mt-1">${m.nome}</p>
+        </div>
+        <span class="text-xs font-semibold px-3 py-1 ${badgeColor} rounded-lg">${m.size} Questões</span>
+      </div>
+    </div>`;
+  });
+  h += `</div>`;
+  document.getElementById('menu-body').innerHTML = h;
+}
+ 
+function start(idx) {
+  curSim = idx; curQ = 0; score = 0; answers = new Array(MODS[idx].bank.length).fill(null);
+  applyTheme(MODS[idx].tema);
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('result').classList.add('hidden');
+  document.getElementById('quiz').classList.remove('hidden');
+  document.getElementById('timer-box').classList.remove('hidden');
+  document.getElementById('sim-title').innerText = MODS[idx].cargo;
+  startTimer(MODS[idx].time);
+  loadQ();
+}
+ 
+function startTimer(seconds) {
+  timeLeft = seconds;
+  clearInterval(timerInterval);
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timeLeft--;
+    updateTimerDisplay();
+    if(timeLeft <= 0) { clearInterval(timerInterval); finish(); }
+  }, 1000);
+}
+ 
+function updateTimerDisplay() {
+  let m = Math.floor(timeLeft / 60), s = timeLeft % 60;
+  document.getElementById('timer').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
+ 
+function loadQ() {
+  let m = MODS[curSim], q = m.bank[curQ];
+  let th = THEMES[m.tema];
+  document.getElementById('tracker').innerText = `Questão ${curQ + 1} de ${m.bank.length}`;
+  document.getElementById('cat').innerText = q[0];
+  document.getElementById('bar').style.width = `${((curQ + 1) / m.bank.length) * 100}%`;
+  document.getElementById('qtext').innerText = q[1];
+  
+  let opts = [q[2], ...q[3]].sort(() => Math.random() - 0.5);
+  let h = '';
+  opts.forEach((opt) => {
+    let sel = answers[curQ] === opt;
+    h += `<div onclick="selectOpt('${opt.replace(/'/g, "\\'")}')" class="p-4 rounded-xl border cursor-pointer transition text-sm font-medium flex items-center gap-3 ${sel ? 'shadow-sm' : 'border-slate-200 hover:bg-slate-50 text-slate-700'}" style="${sel ? `border-color: ${th.m}; background-color: ${th.l}; color:${th.t};` : ''}">
+      <div class="w-4 h-4 rounded-full border flex items-center justify-center shrink-0" style="${sel ? `border-color: ${th.m}; background-color:${th.m};` : 'border-color: #cbd5e1;'}">
+        ${sel ? '<div class="w-1.5 h-1.5 bg-white rounded-full"></div>' : ''}
+      </div>
+      <span>${opt}</span>
+    </div>`;
+  });
+  document.getElementById('opts').innerHTML = h;
+  
+  let exp = document.getElementById('exp');
+  if(answers[curQ] !== null) {
+    exp.classList.remove('hidden');
+    let ok = answers[curQ] === q[2];
+    exp.className = `mt-5 p-4 rounded-lg border text-sm leading-relaxed ${ok ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-rose-50 border-rose-200 text-rose-900'}`;
+    exp.innerHTML = `<strong>${ok ? 'Resposta Correta!' : 'Resposta Incorreta.'}</strong><br>${q[4]}`;
+  } else {
+    exp.classList.add('hidden');
+  }
+  
+  document.getElementById('prev').disabled = curQ === 0;
+  document.getElementById('next').innerText = curQ === m.bank.length - 1 ? 'Finalizar' : 'Próxima';
+}
+ 
+function selectOpt(opt) {
+  answers[curQ] = opt;
+  loadQ();
+}
+ 
+function go(step) {
+  if(step === 1 && curQ === MODS[curSim].bank.length - 1) { finish(); return; }
+  curQ += step;
+  if(curQ < 0) curQ = 0;
+  if(curQ >= MODS[curSim].bank.length) curQ = MODS[curSim].bank.length - 1;
+  loadQ();
+}
+ 
+function finish() {
+  clearInterval(timerInterval);
+  let m = MODS[curSim];
+  score = 0;
+  answers.forEach((a, i) => { if(a === m.bank[i][2]) score++; });
+  let pct = Math.round((score / m.bank.length) * 100);
+  
+  document.getElementById('quiz').classList.add('hidden');
+  document.getElementById('timer-box').classList.add('hidden');
+  document.getElementById('result').classList.remove('hidden');
+  
+  document.getElementById('r-score').innerText = `${score} / ${m.bank.length}`;
+  document.getElementById('r-pct').innerText = `${pct}%`;
+  document.getElementById('msg').innerText = pct >= 70 ? 'Excelente desempenho! Pronto para o concurso Transpetro.' : 'Continue estudando e revisando os conteúdos do edital.';
+  
+  let h = '';
+  m.bank.forEach((q, i) => {
+    let ok = answers[i] === q[2];
+    h += `<div class="p-3 rounded-lg border ${ok ? 'border-emerald-200 bg-emerald-50/50' : 'border-rose-200 bg-rose-50/50'} text-xs">
+      <span class="font-bold block mb-1">Questão ${i+1}: ${q[0]}</span>
+      <p class="text-slate-700 mb-1">${q[1].substring(0, 90)}...</p>
+      <span class="font-semibold ${ok ? 'text-emerald-700' : 'text-rose-700'}">Sua resposta: ${answers[i] || 'Não respondida'}</span>
+      ${!ok ? `<br><span class="text-slate-600">Gabarito: ${q[2]}</span>` : ''}
+    </div>`;
+  });
+  document.getElementById('review').innerHTML = h;
+}
+ 
+renderMenu();
+</script>
+</body>
+</html>
