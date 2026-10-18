@@ -1,0 +1,862 @@
+
+
+Simulados concursos completo · HTML
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulados de Concursos</title>
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+.th-hd{background:var(--d)} .th-sub{color:var(--s)} .th-box{background:var(--m);border:1px solid var(--b)}
+.th-acc{color:var(--t)} .th-chip{background:var(--l);color:var(--t)} .th-bar{background:var(--m)}
+.th-btn{background:var(--m)} .th-btn:hover{background:var(--h)}
+.th-card{background:var(--l);border:1px solid var(--b)} .th-card:hover{filter:brightness(.96)}
+.th-soft{background:var(--l);border:1px solid var(--b)}
+</style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+<header class="th-hd text-white shadow-md py-5 px-4">
+  <div class="max-w-3xl mx-auto flex justify-between items-center gap-4">
+    <div>
+      <h1 class="text-xl font-bold cursor-pointer" onclick="home()">Simulados de Concursos</h1>
+      <p id="sub" class="th-sub text-xs"></p>
+    </div>
+    <div id="timer-box" class="hidden th-box px-3 py-1.5 rounded-lg text-center">
+      <span class="text-[10px] th-sub block">Tempo</span>
+      <span id="timer" class="text-lg font-mono font-bold">50:00</span>
+    </div>
+  </div>
+</header>
+ 
+<main class="max-w-3xl mx-auto w-full p-4 flex-grow">
+  <section id="menu" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 my-6"><div id="menu-body"></div></section>
+ 
+  <section id="quiz" class="hidden space-y-4">
+    <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-slate-200 shadow-sm gap-2">
+      <div>
+        <span id="sim-title" class="text-xs font-bold th-acc block"></span>
+        <span id="tracker" class="text-sm font-semibold text-slate-600"></span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <span id="cat" class="text-[10px] font-bold uppercase px-2.5 py-1 th-chip rounded-full"></span>
+        <button onclick="openMod(mi)" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-slate-700 font-medium cursor-pointer">Sair</button>
+      </div>
+    </div>
+    <div class="h-2 bg-slate-200 rounded-full overflow-hidden"><div id="bar" class="h-full th-bar transition-all" style="width:0%"></div></div>
+    <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+      <h3 id="qtext" class="whitespace-pre-line text-base font-medium text-slate-900 mb-5 leading-relaxed"></h3>
+      <div id="opts" class="space-y-3"></div>
+      <div id="exp" class="hidden mt-5 p-4 rounded-lg border text-sm leading-relaxed"></div>
+    </div>
+    <div class="flex justify-between">
+      <button id="prev" onclick="go(-1)" class="bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 font-medium py-2.5 px-5 rounded-lg text-sm cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Anterior</button>
+      <button id="next" onclick="go(1)" class="th-btn text-white font-medium py-2.5 px-6 rounded-lg text-sm cursor-pointer">Próxima</button>
+    </div>
+  </section>
+ 
+  <section id="result" class="hidden bg-white rounded-xl shadow-sm border border-slate-200 p-6 my-4 space-y-5">
+    <div class="text-center">
+      <h2 class="text-2xl font-bold">Simulado finalizado!</h2>
+      <p id="msg" class="text-slate-600 text-sm mt-1"></p>
+    </div>
+    <div class="grid grid-cols-2 gap-3 text-center">
+      <div class="bg-slate-50 p-4 rounded-lg border border-slate-200"><span class="text-xs text-slate-500 block">Acertos</span><span id="r-score" class="text-2xl font-bold"></span></div>
+      <div class="th-soft p-4 rounded-lg"><span class="text-xs th-acc block">Aproveitamento</span><span id="r-pct" class="text-2xl font-bold th-acc"></span></div>
+    </div>
+    <div class="flex gap-3">
+      <button onclick="openMod(mi)" class="flex-1 bg-slate-200 hover:bg-slate-300 font-semibold py-3 rounded-lg text-sm cursor-pointer">Voltar aos simulados</button>
+      <button onclick="start(curSim)" class="flex-1 th-btn text-white font-semibold py-3 rounded-lg text-sm cursor-pointer">Refazer</button>
+    </div>
+    <div><h3 class="font-bold mb-3">Revisão das questões</h3><div id="review" class="space-y-3"></div></div>
+  </section>
+</main>
+ 
+<footer class="text-center py-5 text-xs text-slate-500">Simulados de estudo. Confira normas e valores nas fontes oficiais.</footer>
+ 
+<script>
+const P="Língua Portuguesa", M="Matemática e Raciocínio Lógico", I="Noções de Informática", E="Conhecimentos Específicos";
+ 
+// ===== DADOS: cada módulo = cargo + banca + tipo de questões. Cada 'size' questões seguidas formam 1 simulado. =====
+const MODS = [
+{
+  tema:"azul", cargo:"Agente Comunitário de Saúde (ESF)", banca:"GL Consultoria", nome:"Questões extensas (estilo prova)", size:10,
+  titles:["SUS, Controle Social, PNAB e ACS", "Imunização, Atribuições e Doenças", "Saneamento, Saúde Mental, Crônicas e Ética", "Epidemiologia, Vigilância e Doenças por Vetores", "Doenças Infecciosas e Imunização", "Saúde da Mulher, Criança e Idoso, ISTs e Normas do ACS"],
+  bank:[
+// ---- Simulado 01: SUS, controle social, PNAB e ACS
+[P,"Leia o texto a seguir.\n\nA Atenção Primária à Saúde é o primeiro contato da população com o sistema de saúde. Quando bem estruturada, resolve a maior parte dos problemas de saúde da comunidade, evita internações desnecessárias e reduz custos. Nesse cenário, o agente comunitário de saúde, por viver na própria comunidade, funciona como elo entre as famílias e a equipe, levando informações em ambas as direções.\n\nCom base no texto, é correto afirmar que o agente comunitário de saúde:","contribui para que as informações circulem entre as famílias e a equipe de saúde.",["substitui os demais profissionais da equipe de saúde.","atua exclusivamente em ambiente hospitalar.","é o responsável pela decisão sobre as internações."],"O texto o descreve como 'elo' que leva informações nos dois sentidos."],
+[P,"Assinale a alternativa que apresenta frase redigida de acordo com a norma-padrão da língua portuguesa:","A equipe de saúde recomendou às famílias que levassem as crianças à unidade para vacinação.",["A equipe de saúde recomendou as famílias que levassem as crianças a unidade para vacinação.","A equipe de saúde recomendou à famílias que levassem as crianças à unidade para vacinação.","A equipe de saúde recomendou às famílias que levassem as crianças à unidade à partir de segunda."],"'Às famílias' e 'à unidade' levam crase (preposição + artigo). Não há crase antes de 'partir' nem antes de plural sem artigo ('à famílias')."],
+[M,"Uma equipe de saúde da família acompanha 1.200 famílias. Na primeira semana do mês, os agentes visitaram 15% delas. Na segunda semana, visitaram 25% das famílias que ainda não tinham sido visitadas. Ao final das duas semanas, o total de famílias visitadas foi de:","435",["300","480","375"],"15% de 1.200 = 180. Restam 1.020; 25% de 1.020 = 255. Total: 180 + 255 = 435."],
+[M,"Uma unidade de saúde consome 3 litros de álcool em gel a cada 5 dias. Mantido o mesmo ritmo de consumo, a quantidade necessária para 30 dias é de:","18 litros",["15 litros","20 litros","9 litros"],"30 dias equivalem a 6 períodos de 5 dias; 6 × 3 = 18 litros."],
+[E,"Sobre os princípios e diretrizes do Sistema Único de Saúde (SUS), analise as afirmativas a seguir.\n\nI. A universalidade garante a todos os cidadãos o acesso às ações e aos serviços de saúde.\nII. A equidade propõe tratar todas as pessoas de forma idêntica, sem considerar as diferenças de necessidade.\nIII. A participação da comunidade na gestão do SUS é exercida por meio dos Conselhos e das Conferências de Saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II.","Apenas I e III.","I, II e III."],"A equidade trata de forma desigual os desiguais, priorizando quem mais precisa; por isso a afirmativa II é falsa.",1],
+[E,"Em uma reunião do Conselho Municipal de Saúde, representantes dos usuários, dos trabalhadores e dos gestores discutiram o plano municipal de saúde. Esse espaço de participação, previsto na Lei nº 8.142/1990, caracteriza-se por ser:","permanente e deliberativo, com os usuários representando metade dos membros.",["temporário e apenas consultivo, sem poder de decisão.","exclusivo de gestores e prestadores de serviço.","privado e dependente de autorização judicial."],"O Conselho de Saúde é órgão colegiado permanente e deliberativo, com composição paritária (50% de usuários)."],
+[E,"Maria procura a unidade básica de saúde com febre persistente. A equipe a avalia, resolve o caso e, quando necessário, a encaminha a outro ponto da rede, mantendo o acompanhamento. Segundo a PNAB (Portaria nº 2.436/2017), esse exemplo ilustra a função de:","coordenar o cuidado e ordenar a rede de atenção à saúde.",["atender apenas casos de urgência hospitalar.","oferecer cuidado fragmentado, sem vínculo com o usuário.","substituir os demais pontos da rede de atenção."],"A APS é a porta de entrada preferencial, coordena o cuidado e ordena o acesso à rede."],
+[E,"Em relação às atividades do agente comunitário de saúde (Lei nº 11.350/2006), analise as afirmativas a seguir.\n\nI. O ACS deve residir na área da comunidade em que atuar.\nII. Cabe ao ACS prescrever medicamentos aos moradores da microárea.\nIII. O ACS realiza visitas domiciliares e orienta sobre a prevenção de doenças e a promoção da saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"Prescrever medicamentos não é atribuição do ACS; a afirmativa II é falsa.",1],
+[E,"Ao iniciar o trabalho em uma microárea, o agente comunitário de saúde percorre as ruas, identifica as famílias, registra as moradias, as condições de saneamento e os grupos prioritários (gestantes, crianças, idosos e pessoas com doenças crônicas). Essa atividade corresponde, principalmente, ao:","cadastramento das famílias e ao mapeamento do território.",["tratamento clínico das doenças identificadas.","procedimento de aplicação de vacinas.","processo de emissão de atestados médicos."],"O cadastro e o mapeamento orientam o planejamento das ações da equipe."],
+[E,"Durante uma visita domiciliar, o ACS identifica um morador com sintomas de doença de notificação compulsória. A conduta mais adequada é:","comunicar imediatamente a equipe de saúde, para que a notificação e as medidas de vigilância sejam realizadas.",["aguardar que o morador procure a unidade por conta própria.","orientar que ele não procure atendimento para evitar exames.","divulgar o caso entre os vizinhos para alertar a comunidade."],"A notificação é obrigatória e permite à vigilância agir rapidamente, respeitando o sigilo."],
+ 
+// ---- Simulado 02: imunização, atribuições e doenças
+[P,"Leia o texto a seguir.\n\nA vacinação é uma das medidas de saúde pública de melhor custo-benefício. Doenças como a poliomielite e o sarampo foram controladas graças à imunização em massa. No entanto, a queda nas coberturas vacinais, impulsionada pela desinformação, ameaça esses avanços e permite o retorno de doenças que já estavam sob controle.\n\nSegundo o texto, a queda nas coberturas vacinais:","pode provocar o retorno de doenças que já estavam controladas.",["é consequência do controle completo das doenças.","resulta do excesso de informação científica.","não interfere na saúde coletiva."],"O texto afirma que a queda 'permite o retorno de doenças que já estavam sob controle'."],
+[P,"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão:","Devem ser realizadas visitas domiciliares semanais às famílias de risco.",["Deve ser realizado visitas domiciliares semanais às famílias de risco.","Haviam famílias em situação de risco na microárea.","Fazem dois meses que o agente iniciou o cadastramento."],"O verbo acompanha o sujeito 'visitas' (plural). 'Haver' (existir) e 'fazer' (tempo) são impessoais."],
+[M,"Uma campanha de vacinação atendeu 840 crianças em 7 dias, com o mesmo número de atendimentos por dia. Mantido esse ritmo, o número de crianças atendidas em 12 dias será de:","1.440",["1.260","1.200","1.680"],"840 ÷ 7 = 120 por dia; 120 × 12 = 1.440."],
+[M,"Um agente comunitário registrou o número de visitas realizadas em cinco dias: 12, 15, 9, 15 e 14. A média, a mediana e a moda desse conjunto são, respectivamente:","13, 14 e 15.",["13, 15 e 14.","14, 13 e 15.","13, 12 e 15."],"Soma = 65, média = 13. Ordenando: 9, 12, 14, 15, 15; a mediana é 14 e a moda é 15."],
+[E,"Em uma unidade de saúde, a geladeira de vacinas ficou desligada durante a noite e a temperatura saiu da faixa de +2 °C a +8 °C. Quanto à conservação dos imunobiológicos (cadeia de frio), a conduta correta é:","isolar os imunobiológicos, comunicar a coordenação e aguardar avaliação técnica antes de qualquer uso.",["usar normalmente, pois a variação é irrelevante.","descartar tudo sem registrar a ocorrência.","congelar as vacinas para preservá-las."],"Variações de temperatura podem comprometer a eficácia; a decisão é técnica e deve ser registrada."],
+[E,"Sobre o aleitamento materno e a alimentação complementar, analise as afirmativas a seguir.\n\nI. Até os seis meses de idade, o bebê deve receber leite materno exclusivo.\nII. A partir dos seis meses, inicia-se a alimentação complementar, mantendo-se o leite materno.\nIII. Água e chás devem ser oferecidos desde o primeiro mês para evitar cólicas.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Antes dos seis meses, o leite materno exclusivo supre as necessidades do bebê, inclusive de líquidos.",1],
+[E,"Joana, de 22 anos, está grávida de 10 semanas e ainda não iniciou o pré-natal, pois acredita que só precisa consultar perto do parto. A orientação mais adequada do agente comunitário de saúde é:","explicar a importância do início precoce do pré-natal e ajudar a agendar a primeira consulta na unidade.",["concordar e aguardar o final da gestação.","sugerir que ela use vitaminas por conta própria.","orientar que procure atendimento apenas se sentir dor."],"O pré-natal precoce reduz riscos para a mãe e para o bebê."],
+[E,"Sobre a dengue, analise as afirmativas a seguir.\n\nI. A eliminação de água parada é a principal medida de prevenção.\nII. Dor abdominal intensa e vômitos persistentes são sinais de alarme.\nIII. O ácido acetilsalicílico (AAS) é recomendado para baixar a febre.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"O AAS é contraindicado na suspeita de dengue, pelo risco de sangramento.",1],
+[E,"Em visita domiciliar, o ACS encontra um morador com tosse há mais de três semanas, febre no fim da tarde e emagrecimento. A conduta adequada é:","encaminhá-lo à unidade de saúde para investigação de tuberculose e comunicar a equipe.",["orientar apenas o uso de xarope caseiro.","aguardar a tosse passar espontaneamente.","dizer que se trata de alergia e dispensar a avaliação."],"Tosse por três semanas ou mais caracteriza o sintomático respiratório."],
+[E,"Em uma ação educativa, um participante afirma que o HIV pode ser transmitido por abraço e pelo uso do mesmo copo. A resposta correta do ACS é:","o HIV não se transmite por contato social casual; a transmissão ocorre por sangue, relação sexual sem proteção e de mãe para filho.",["isso está correto, por isso é preciso evitar contato com pessoas com HIV.","a transmissão ocorre por picada de mosquito e por tosse.","a transmissão ocorre somente em hospitais."],"Combater o estigma faz parte da educação em saúde."],
+ 
+// ---- Simulado 03: saneamento, saúde mental, crônicas, ética e educação em saúde
+[P,"Leia o texto a seguir.\n\nEm muitos bairros, o descarte inadequado de lixo favorece a proliferação de ratos e mosquitos. A coleta seletiva e a destinação correta dos resíduos reduzem a poluição e previnem doenças. Cabe a cada morador colaborar, mas o poder público tem o dever de garantir o serviço de coleta e o saneamento básico.\n\nO texto defende que:","moradores e poder público têm responsabilidades na gestão dos resíduos e na prevenção de doenças.",["somente os moradores são responsáveis pelo lixo.","a coleta seletiva aumenta a poluição.","o saneamento básico é dispensável."],"O texto divide a responsabilidade entre moradores e poder público."],
+[P,"Assinale a alternativa em que a pontuação está de acordo com a norma-padrão:","Os agentes, que conhecem bem a comunidade, orientaram as famílias.",["Os agentes que, conhecem bem a comunidade orientaram as famílias.","Os agentes, que conhecem bem a comunidade orientaram, as famílias.","Os agentes que conhecem bem, a comunidade, orientaram as famílias."],"A oração explicativa 'que conhecem bem a comunidade' fica entre vírgulas."],
+[M,"Uma caixa d'água tem formato de paralelepípedo, com 2 m de comprimento, 1,5 m de largura e 1 m de altura. Quando totalmente cheia, ela comporta:","3.000 litros.",["300 litros.","30.000 litros.","4.500 litros."],"V = 2 × 1,5 × 1 = 3 m³, e 1 m³ equivale a 1.000 litros."],
+[M,"Para tratar a água de um tambor, um agente orienta o uso de 2 gotas de hipoclorito para cada litro. Para um tambor com 200 litros, serão necessárias:","400 gotas.",["100 gotas.","200 gotas.","40 gotas."],"2 gotas × 200 litros = 400 gotas."],
+[E,"Sobre o consumo e o armazenamento de água, analise as afirmativas a seguir.\n\nI. A água de consumo deve ser filtrada, fervida ou tratada com hipoclorito, conforme a orientação.\nII. As caixas d'água devem permanecer tampadas e ser limpas periodicamente.\nIII. Pode-se beber água de poço desprotegido, pois ela é sempre potável.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Água de fonte desprotegida pode estar contaminada, por isso a afirmativa III é falsa.",1],
+[E,"Um idoso viúvo, que antes participava de atividades no bairro, passou a isolar-se, relata cansaço constante e diz que \"não faz mais sentido viver\". A atitude mais adequada do ACS é:","acolher e escutar sem julgamento, considerar o relato um sinal de alerta e comunicar imediatamente a equipe para avaliação e encaminhamento.",["dizer que isso é frescura e que logo passa.","prometer manter o relato em segredo absoluto.","aguardar a melhora espontânea sem comunicar ninguém."],"Sinais de risco de suicídio exigem acolhimento e encaminhamento rápidos."],
+[E,"Sobre a Rede de Atenção Psicossocial (RAPS), é correto afirmar que:","os Centros de Atenção Psicossocial (CAPS) oferecem cuidado comunitário a pessoas com sofrimento mental intenso.",["o CAPS é hospital psiquiátrico de internação de longa permanência.","o CAPS atende apenas mediante ordem judicial.","a RAPS exclui a Atenção Básica."],"O modelo é comunitário e em liberdade, articulado com a Atenção Básica."],
+[E,"O senhor Antônio, de 62 anos e hipertenso, parou de tomar o medicamento porque \"a pressão normalizou\". A orientação mais adequada do ACS é:","explicar que a pressão controlada resulta do tratamento, orientar a continuidade do uso e avisar a equipe para reavaliação.",["concordar, pois a pressão normalizada dispensa o remédio.","sugerir dobrar a dose quando sentir mal-estar.","orientar a trocar o remédio por chás."],"A adesão ao tratamento previne complicações como AVC e infarto."],
+[E,"Em uma visita, o ACS toma conhecimento de que um vizinho tem uma doença. Outro morador pergunta sobre a saúde desse vizinho. A conduta ética é:","manter o sigilo das informações obtidas no exercício da função, compartilhando-as apenas com a equipe, quando necessário.",["contar tudo, pois a comunidade tem direito à informação.","comentar apenas com os amigos mais próximos.","divulgar nas redes sociais para alertar a vizinhança."],"O sigilo é dever ético e protege a dignidade das pessoas."],
+[E,"Para uma ação educativa sobre a prevenção da dengue na comunidade, a estratégia mais adequada é:","planejar a atividade com linguagem acessível, mobilizar moradores e lideranças e dialogar a partir da realidade do território.",["apenas distribuir folhetos, sem conversar com os moradores.","realizar palestra técnica com linguagem difícil.","culpar os moradores pelos casos da doença."],"A educação em saúde é participativa e considera o contexto local."],
+ 
+// ---- Simulado 04: epidemiologia, vigilância e doenças transmitidas por vetores
+[P,"Leia o trecho a seguir.\n\n'A dengue não escolhe endereço: bate à porta de ricos e pobres, à procura de água parada.'\n\nNesse trecho, a expressão 'bate à porta' constitui exemplo de:","personificação (prosopopeia), pois atribui uma ação humana à doença.",["hipérbole, pois exagera a gravidade da doença.","ironia, pois expressa o contrário do que se quer dizer.","antítese, pois aproxima ideias opostas."],"Atribuir ao fenômeno uma ação própria de pessoas (bater à porta) é personificação."],
+[P,"Em 'A vacina é gratuita; no entanto, muitos moradores não a procuram', o conectivo 'no entanto' pode ser substituído, sem alteração do sentido, por:","contudo.",["portanto.","porque.","logo."],"'No entanto' e 'contudo' são conjunções adversativas (oposição); as demais indicam conclusão ou causa."],
+[M,"O número de casos de uma doença em um bairro, em função do tempo t (em semanas), é dado por C(t) = t² − 8t + 15. O número de casos é igual a zero nas semanas:","3 e 5.",["2 e 6.","1 e 15.","4 e 4."],"Soma das raízes = 8 e produto = 15, logo t = 3 e t = 5."],
+[M,"Cinco agentes visitam 100 domicílios em 4 dias. Mantido o mesmo ritmo por agente, o número de domicílios visitados por 8 agentes em 5 dias é de:","200.",["160.","250.","125."],"Cada agente visita 5 domicílios por dia (100 ÷ 20). Então 8 × 5 × 5 = 200."],
+[E,"Sobre noções de epidemiologia, analise as afirmativas a seguir.\n\nI. Hospedeiro é o organismo que alberga o agente infeccioso.\nII. Vetor é o animal que transmite o agente infeccioso de um hospedeiro a outro.\nIII. Período de incubação é o tempo entre o início dos sintomas e a cura.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Período de incubação é o intervalo entre a exposição ao agente e o aparecimento dos primeiros sintomas.",1],
+[E,"Em uma indústria da região, vários trabalhadores apresentaram intoxicação pelo contato com um produto químico. A vigilância que deve investigar as condições do ambiente e dos processos de trabalho, para identificar e reduzir os riscos, é a vigilância em:","saúde do trabalhador.",["nutrição, apenas.","zoonoses, exclusivamente.","fronteiras e portos, apenas."],"A vigilância em saúde do trabalhador atua sobre a relação entre trabalho e saúde."],
+[E,"O ACS registra, em cada visita, os dados das famílias no sistema e-SUS da Atenção Primária. Sobre esse registro, é correto afirmar que:","as informações devem ser fiéis à realidade e tratadas com sigilo, pois subsidiam o planejamento e a vigilância em saúde.",["os dados podem ser preenchidos de forma aproximada, sem conferência.","as informações podem ser divulgadas livremente à comunidade.","o registro é opcional e não interfere no planejamento."],"Dados corretos permitem diagnosticar o território e orientar as ações da equipe."],
+[E,"Um morador relata febre, dores muito intensas nas articulações e manchas na pele após picadas de mosquito. Entre as doenças transmitidas pelo Aedes aegypti, o quadro com dor articular intensa e duradoura é mais característico da:","febre chikungunya.",["doença de Chagas.","esquistossomose.","leptospirose."],"A dor articular intensa é a marca da chikungunya; Chagas e esquistossomose não são transmitidas pelo Aedes."],
+[E,"Sobre doenças de interesse em saúde pública, analise as afirmativas a seguir.\n\nI. A vacinação é a principal forma de prevenção da febre amarela.\nII. A leishmaniose visceral é transmitida pela água contaminada.\nIII. A esquistossomose é transmitida por mosquito e prevenida com repelente.\n\nEstá(ão) correta(s):","Apenas I.",["Apenas I.","Apenas II.","Apenas I e III.","I, II e III."],"A leishmaniose é transmitida pelo mosquito-palha (flebotomíneo) e a esquistossomose pelo contato com água contaminada por larvas de caramujos.",1],
+[E,"Em área rural, uma família mora em casa de pau a pique com frestas, onde há presença de barbeiros. A orientação adequada do ACS é:","comunicar a equipe e a vigilância, orientar a não esmagar o inseto com as mãos, guardá-lo em recipiente para identificação e buscar a melhoria da moradia.",["ignorar, pois o barbeiro não causa doenças.","orientar a queimar o imóvel e se mudar.","orientar apenas o uso de repelente na pele."],"O barbeiro transmite o Trypanosoma cruzi, causador da doença de Chagas."],
+ 
+// ---- Simulado 05: doenças infecciosas e imunização
+[P,"Leia o texto a seguir.\n\nO Brasil possui um dos maiores programas públicos de imunização do mundo. O calendário de vacinação é revisado periodicamente e disponibiliza gratuitamente dezenas de imunobiológicos em todo o território. Entretanto, para que a proteção seja eficaz, é necessário que as doses sejam tomadas nos prazos recomendados.\n\nSegundo o texto, para que a proteção das vacinas seja eficaz, é necessário que:","as doses sejam tomadas nos prazos recomendados.",["as vacinas sejam pagas pelo usuário.","o calendário nunca seja revisado.","as doses sejam espaçadas sem critério."],"A condição aparece explícita após 'Entretanto'."],
+[P,"Assinale a alternativa em que todas as palavras estão grafadas de acordo com a norma-padrão:","ansiedade, hepatite, higiene, vigilância.",["ansiedade, hepatite, higiêne, vigilância.","ansiedade, hepatite, higiene, vigilânsia.","ancsiedade, hepatite, higiene, vigilância."],"As demais alternativas apresentam erro de grafia ('higiêne', 'vigilânsia', 'ancsiedade')."],
+[M,"Em uma comunidade, a probabilidade de um morador sorteado ao acaso ter sido vacinado é de 0,85. Entre 600 moradores, o número esperado de não vacinados é de:","90.",["510.","85.","150."],"A probabilidade de não ter sido vacinado é 0,15; 0,15 × 600 = 90."],
+[M,"Para ampliar a compra de insumos, uma prefeitura aplicou R$ 2.000,00 a juros simples de 1,5% ao mês, durante 8 meses. O valor dos juros foi de:","R$ 240,00.",["R$ 120,00.","R$ 300,00.","R$ 2.240,00."],"J = 2.000 × 0,015 × 8 = 240."],
+[E,"Sobre a vacinação, analise as afirmativas a seguir.\n\nI. Um evento adverso pós-vacinação não precisa ser comunicado à equipe de saúde.\nII. Febre baixa e dor no local da aplicação são reações possíveis e, em geral, leves.\nIII. A vacina deve ser sempre suspensa em qualquer criança com resfriado leve, sem exceção.\n\nEstá(ão) correta(s):","Apenas II.",["Apenas I.","Apenas II.","Apenas I e III.","I, II e III."],"Eventos adversos devem ser comunicados e investigados; um resfriado leve, em geral, não contraindica a vacina.",1],
+[E,"Sobre a hanseníase e a tuberculose, analise as afirmativas a seguir.\n\nI. A hanseníase pode causar manchas na pele com perda de sensibilidade.\nII. O tratamento das duas doenças é gratuito no SUS.\nIII. A tuberculose é transmitida pelo compartilhamento de talheres.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"A tuberculose pulmonar é transmitida por via respiratória, e não por talheres.",1],
+[E,"O ACS orienta uma família sobre as hepatites virais. A orientação correta é:","a hepatite A é transmitida por água e alimentos contaminados, e a hepatite B pode ser prevenida pela vacina.",["todas as hepatites se previnem apenas com antibiótico.","a hepatite B é transmitida por abraço e aperto de mão.","não existe vacina contra nenhuma hepatite."],"Higiene e saneamento previnem a hepatite A; a vacina protege contra a B."],
+[E,"Uma criança de 7 anos é mordida por um cão desconhecido na rua. A conduta imediata mais adequada é:","lavar o ferimento com água corrente e sabão e levar a criança à unidade de saúde para avaliação.",["aplicar pó de café no ferimento.","fechar o ferimento com curativo bem apertado.","aguardar sete dias para ver se o animal adoece."],"A avaliação define sobre soro e vacina antirrábica."],
+[E,"Em um bairro sem esgoto tratado, vários moradores apresentaram diarreia intensa. Entre as medidas listadas, a mais adequada de prevenção coletiva é:","melhorar o saneamento e orientar sobre tratamento da água, higiene das mãos e cuidados com os alimentos.",["usar repelente nos moradores.","distribuir antibiótico a todos, sem avaliação.","evitar o contato com os doentes e nada mais."],"Cólera, febre tifoide e diarreias estão ligadas à água e aos alimentos contaminados."],
+[E,"Sobre as doenças imunopreveníveis, a afirmação correta é:","a vacinação em dia protege contra tétano, difteria, sarampo e formas de meningite.",["o tétano é transmitido de pessoa a pessoa pela tosse.","não existe vacina contra o sarampo.","não existe vacina contra nenhuma forma de meningite."],"O tétano não é transmitido entre pessoas; ele resulta de ferimentos contaminados pela bactéria."],
+ 
+// ---- Simulado 06: saúde da mulher, da criança e do idoso, ISTs e normas do ACS
+[P,"Leia o texto a seguir.\n\nO envelhecimento da população brasileira exige novas formas de cuidado. A visita domiciliar permite conhecer a rotina do idoso, identificar riscos de queda e incentivar a adesão ao tratamento, sobretudo quando há doenças crônicas, como a hipertensão e o diabetes.\n\nDe acordo com o texto, a visita domiciliar ao idoso permite:","conhecer a rotina, identificar riscos e incentivar a adesão ao tratamento.",["substituir o tratamento das doenças crônicas.","dispensar o acompanhamento da equipe.","evitar o envelhecimento da população."],"As três funções estão citadas no segundo período."],
+[P,"Em 'Os agentes visitaram a gestante pela manhã', o termo 'a gestante' exerce a função sintática de:","objeto direto.",["objeto indireto.","sujeito.","adjunto adverbial."],"Complementa o verbo transitivo direto 'visitaram', sem preposição."],
+[M,"Uma rampa de acesso para cadeirantes forma um ângulo de 30° com o solo e tem 6 m de comprimento. Considerando sen 30° = 1/2, a altura que ela alcança é de:","3 m.",["2 m.","4 m.","6 m."],"sen 30° = altura ÷ 6, logo altura = 6 × 1/2 = 3 m."],
+[M,"Um terreno retangular de 18 m por 12 m será usado para uma horta comunitária, reservando-se 1/4 da área para circulação. A área destinada ao plantio é de:","162 m².",["54 m².","216 m².","180 m²."],"Área total = 216 m²; 1/4 é 54; 216 − 54 = 162."],
+[E,"Sobre as infecções sexualmente transmissíveis (ISTs) e a saúde sexual, analise as afirmativas a seguir.\n\nI. O uso de método contraceptivo hormonal dispensa o preservativo na prevenção das ISTs.\nII. Sífilis, gonorreia e HPV são exemplos de ISTs.\nIII. O teste rápido para HIV e sífilis é oferecido nas unidades de saúde do SUS.\n\nEstá(ão) correta(s):","Apenas II e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"Contraceptivos hormonais não protegem contra ISTs; só o preservativo faz parte da prevenção combinada.",1],
+[E,"Uma puérpera relata dificuldade para amamentar, com dor e rachaduras nos mamilos. A orientação mais adequada do ACS é:","incentivar a manutenção do aleitamento, orientar sobre a pega correta e encaminhar à equipe para avaliação.",["suspender imediatamente a amamentação.","oferecer água e chás ao bebê no lugar do leite.","indicar fórmula infantil sem avaliação profissional."],"A maior parte das dificuldades se resolve com orientação sobre pega e posição."],
+[E,"Sobre os aspectos legais do aborto no Brasil, a afirmação correta é:","o Código Penal não pune o aborto em caso de risco de vida da gestante e de gravidez resultante de estupro, e o STF admitiu também os casos de anencefalia fetal.",["é permitido em qualquer situação, a pedido da gestante.","nunca é permitido, sem nenhuma exceção legal.","só é permitido com autorização do cônjuge."],"Art. 128 do Código Penal e decisão do STF na ADPF 54."],
+[E,"Uma mãe relata que seu bebê de 6 meses não sustenta a cabeça e não reage a sons. Em relação ao desenvolvimento infantil, a conduta mais adequada do ACS é:","orientar que a criança seja avaliada pela equipe de saúde, pois podem ser sinais de atraso no desenvolvimento.",["tranquilizar a mãe, dizendo que cada criança tem seu tempo, sem avaliação.","orientar a esperar até os 3 anos de idade.","sugerir que ela procure um curandeiro."],"Sinais de alerta devem ser avaliados precocemente, para intervenção oportuna."],
+[E,"Sobre o acompanhamento de pessoas idosas, analise as afirmativas a seguir.\n\nI. No acompanhamento domiciliar, o ACS pode identificar riscos de queda, como tapetes soltos e pouca iluminação.\nII. A adesão ao tratamento das doenças crônicas ajuda a prevenir complicações.\nIII. A pessoa idosa perde o direito de decidir sobre o próprio tratamento por causa da idade.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"A pessoa idosa mantém sua autonomia e o direito de participar das decisões sobre seu cuidado.",1],
+[E,"Um agente comunitário de saúde recém-contratado pergunta ao coordenador qual norma, ao lado da Lei nº 11.350/2006, trata das diretrizes de sua atividade. A resposta correta é o Decreto nº 3.189/1999, que:","fixa diretrizes para o exercício da atividade de agente comunitário de saúde.",["estabelece normas de vigilância sanitária de alimentos.","define o calendário nacional de vacinação.","institui o código de ética médica."],"O decreto trata das diretrizes e das atribuições do ACS no SUS."]
+]
+},
+{
+  tema:"azul", cargo:"Agente Comunitário de Saúde (ESF)", banca:"GL Consultoria", nome:"Questões objetivas curtas", size:10,
+  titles:[
+  "SUS, Leis 8.080/90 e 8.142/90", "PNAB, ESF e Lei 11.350/2006", "Atribuições do ACS, Imunização e Notificação",
+  "Epidemiologia e Arboviroses", "Doenças de Interesse em Saúde Pública", "Raiva, Tétano, Crônicas e ISTs",
+  "ISTs, Saneamento e Saúde Mental"
+],
+  bank:[
+// ---- Simulado 01: SUS e controle social
+[P,"Em 'Vacine-se hoje!', predomina a função da linguagem:","Conativa (apelativa)",["Referencial","Emotiva","Poética"],"O texto procura levar o leitor a agir, característica da função conativa."],
+[P,"Em 'Estou morrendo de fome', há a figura de linguagem:","Hipérbole",["Metáfora","Eufemismo","Ironia"],"A hipérbole exagera a ideia para dar ênfase."],
+[M,"Um capital de R$ 1.000 aplicado a juros simples de 2% ao mês durante 5 meses rende de juros:","R$ 100",["R$ 10","R$ 110","R$ 200"],"J = C × i × t = 1.000 × 0,02 × 5 = 100."],
+[M,"Em uma comunidade de 2.000 pessoas, 15% são crianças. Quantas são crianças?","300",["150","200","350"],"0,15 × 2.000 = 300."],
+[E,"O princípio do SUS que garante o acesso de todos às ações e serviços de saúde, sem discriminação, é a:","Universalidade",["Equidade","Hierarquização","Regionalização"],"Saúde é direito de todos e dever do Estado."],
+[E,"O princípio da equidade no SUS significa:","Tratar de forma desigual os desiguais, priorizando quem mais precisa",["Tratar todos exatamente igual","Atender só quem paga","Atender apenas idosos"],"Busca reduzir desigualdades, oferecendo mais a quem tem maior necessidade."],
+[E,"A integralidade no SUS pressupõe:","Atenção ao indivíduo em todos os níveis: promoção, prevenção, tratamento e reabilitação",["Atendimento apenas de urgência","Foco só na doença","Ações só hospitalares"],"Vê a pessoa como um todo e articula as ações de saúde."],
+[E,"A Lei nº 8.080/1990 é a:","Lei Orgânica da Saúde, que organiza e regula o funcionamento do SUS",["Lei que cria o Bolsa Família","Lei do ECA","Lei da previdência"],"Dispõe sobre promoção, proteção e recuperação da saúde."],
+[E,"A Lei nº 8.142/1990 dispõe sobre:","A participação da comunidade na gestão do SUS e as transferências de recursos financeiros",["As atribuições do ACS","A vacinação obrigatória","A saúde suplementar"],"Cria as Conferências e os Conselhos de Saúde."],
+[E,"Os Conselhos de Saúde são órgãos:","Permanentes e deliberativos, com participação paritária de usuários",["Temporários e apenas consultivos","Exclusivos de médicos","Privados"],"Os usuários representam 50% dos membros. É o controle social do SUS."],
+ 
+// ---- Simulado 02: PNAB e legislação do ACS
+[P,"Um folheto que ensina como prevenir a dengue é um texto predominantemente:","Injuntivo (instrucional)",["Narrativo","Poético","Descritivo"],"Orienta e instrui o leitor sobre como agir."],
+[P,"A palavra 'infelizmente' é formada por:","Derivação prefixal e sufixal",["Composição por justaposição","Composição por aglutinação","Onomatopeia"],"in- (prefixo) + feliz + -mente (sufixo)."],
+[M,"Se 3 agentes visitam 90 casas em 5 dias, 6 agentes visitam 180 casas em:","5 dias",["10 dias","2,5 dias","6 dias"],"Regra de três composta: dobrando agentes e casas, o prazo se mantém."],
+[M,"As raízes da equação x² − 5x + 6 = 0 são:","2 e 3",["1 e 6","−2 e −3","5 e 6"],"Soma = 5 e produto = 6, logo as raízes são 2 e 3."],
+[E,"Segundo a PNAB (Portaria nº 2.436/2017), a Atenção Primária é:","Porta de entrada preferencial e ordenadora do cuidado na rede de atenção",["Serviço só para urgências","Atendimento exclusivo hospitalar","Atenção especializada de alta complexidade"],"Coordena o cuidado e organiza o acesso às demais redes."],
+[E,"A Estratégia Saúde da Família (ESF) é considerada pela PNAB:","Estratégia prioritária de expansão e consolidação da Atenção Primária",["Programa temporário","Serviço apenas de vacinação","Serviço privado"],"Reorganiza a atenção básica com foco na família e no território."],
+[E,"A equipe de Saúde da Família é composta, no mínimo, por:","Médico, enfermeiro, técnico ou auxiliar de enfermagem e agente comunitário de saúde",["Apenas médico e enfermeiro","Dentista e psicólogo","Somente agentes comunitários"],"Pode contar com outros profissionais, como a equipe de saúde bucal."],
+[E,"A Lei nº 11.350/2006 regulamenta:","As atividades de Agente Comunitário de Saúde e de Agente de Combate às Endemias",["O Sistema de Vigilância Sanitária","O Estatuto do Idoso","A Lei Orgânica da Saúde"],"Trata de atribuições, contratação e vínculo."],
+[E,"Segundo a Lei nº 11.350/2006, um requisito do ACS é:","Residir na área da comunidade em que atuar",["Ter formação superior","Morar em outro município","Ser servidor federal"],"O vínculo com a comunidade é essencial ao trabalho."],
+[E,"Não é atribuição do ACS:","Prescrever medicamentos",["Cadastrar famílias","Orientar sobre vacinas","Realizar visitas domiciliares"],"Prescrição é atividade de profissional habilitado."],
+ 
+// ---- Simulado 03: atribuições do ACS, imunização e notificação
+[P,"Em 'Os agentes visitaram as famílias', o sujeito é:","Simples: 'Os agentes'",["Oculto","Indeterminado","Inexistente"],"Está explícito e tem um só núcleo ('agentes')."],
+[P,"Assinale a frase correta quanto à concordância:","Vendem-se casas nesse bairro.",["Vende-se casas nesse bairro.","Houveram muitas visitas ontem.","Fazem três anos que me mudei."],"Na voz passiva sintética o verbo concorda com o sujeito ('casas'); 'haver' e 'fazer' (tempo) são impessoais."],
+[M,"Em um sorteio entre 20 famílias, 5 têm gestantes. A probabilidade de sortear uma família com gestante é:","1/4",["1/5","1/2","5/4"],"5/20 = 1/4."],
+[M,"A média geométrica entre 4 e 9 é:","6",["6,5","13","36"],"√(4 × 9) = √36 = 6."],
+[E,"A visita domiciliar do ACS tem por finalidade:","Acompanhar as famílias, orientar e identificar situações de risco",["Substituir a consulta médica","Cobrar taxas","Aplicar procedimentos de enfermagem"],"É o principal instrumento de vínculo entre equipe e comunidade."],
+[E,"Em relação à gestante, o ACS deve:","Acompanhar e incentivar o início precoce e a regularidade do pré-natal",["Indicar medicamentos","Realizar o parto","Desencorajar consultas"],"O pré-natal reduz riscos para a mãe e o bebê."],
+[E,"O aleitamento materno deve ser exclusivo até:","6 meses de vida",["2 meses","4 meses","1 ano"],"Depois, inicia-se a alimentação complementar, mantendo o leite materno."],
+[E,"A vacina BCG, aplicada ao nascer, previne:","As formas graves de tuberculose",["Sarampo","Hepatite A","Dengue"],"Protege principalmente contra a tuberculose miliar e meníngea."],
+[E,"A cadeia de frio das vacinas exige conservação, em geral, entre:","+2 °C e +8 °C",["−20 °C e −10 °C","+10 °C e +15 °C","0 °C e −5 °C"],"Fora dessa faixa, o imunobiológico pode perder a eficácia."],
+[E,"A notificação compulsória de doenças é:","Obrigatória para profissionais e serviços de saúde",["Facultativa","Feita só pelo paciente","Proibida sem autorização judicial"],"Permite a vigilância epidemiológica agir rapidamente."],
+ 
+// ---- Simulado 04: epidemiologia e arboviroses
+[P,"Em 'A dengue é grave; portanto, é preciso prevenir', o conectivo 'portanto' indica:","Conclusão",["Oposição","Causa","Adição"],"Introduz a consequência do que foi afirmado antes."],
+[P,"Na frase 'O ACS é o elo entre a comunidade e a equipe de saúde', a ideia central é:","O ACS faz a ligação entre a comunidade e a equipe",["O ACS substitui o médico","O ACS trabalha isolado","O ACS só cadastra famílias"],"'Elo' indica ligação entre as duas partes."],
+[M,"O valor de sen 30° é:","1/2",["√3/2","√2/2","1"],"É um valor notável da trigonometria."],
+[M,"Uma caixa d'água cúbica de 2 m de aresta tem volume de:","8 m³ (8.000 litros)",["4 m³","6 m³","16 m³"],"V = 2 × 2 × 2 = 8 m³; 1 m³ = 1.000 L."],
+[E,"O período de incubação de uma doença é:","O intervalo entre a exposição ao agente e o aparecimento dos primeiros sintomas",["O tempo de duração da cura","O tempo entre duas doses de vacina","O período de internação"],"Durante ele, a pessoa pode ainda não apresentar sintomas."],
+[E,"Vetor é:","O organismo que transporta e transmite o agente infeccioso a outro ser vivo",["Qualquer medicamento","Uma vacina","O local de tratamento"],"Ex.: o mosquito Aedes aegypti na dengue."],
+[E,"A vigilância sanitária atua sobre:","Riscos à saúde ligados a produtos, serviços e ambientes, como alimentos e estabelecimentos",["Apenas doenças transmissíveis","Só o controle de natalidade","Somente vacinas"],"Fiscaliza para prevenir riscos à população."],
+[E,"A principal forma de prevenir a dengue é:","Eliminar locais com água parada onde o mosquito se reproduz",["Tomar antibiótico","Evitar contato com pessoas","Beber água fervida apenas"],"O Aedes aegypti se reproduz em água parada limpa."],
+[E,"São sinais de alarme da dengue:","Dor abdominal intensa, vômitos persistentes e sangramentos",["Apenas coriza","Dor de ouvido","Tosse leve"],"Exigem atendimento de saúde imediato."],
+[E,"Zika e chikungunya são transmitidas pelo mesmo vetor da dengue, que é o:","Aedes aegypti",["Barbeiro","Flebotomíneo","Caramujo"],"O combate ao mosquito previne as três doenças."],
+ 
+// ---- Simulado 05: doenças de interesse em saúde pública
+[P,"Assinale a frase em que há regência e crase corretas:","Chegamos ao posto de saúde às oito horas.",["Chegamos no posto de saúde às oito horas.","Chegamos ao posto de saúde as oito horas.","Chegamos em o posto de saúde às oito horas."],"'Chegar' pede a preposição 'a'; antes de hora feminina há crase."],
+[P,"Assinale a frase em que a crase está correta:","Fui à unidade de saúde ontem.",["Fui à pé até a unidade.","Vou à visitar as famílias.","Refiro-me à elas."],"'À unidade' = a + a. Não há crase antes de palavra masculina, verbo ou pronome pessoal."],
+[M,"A solução do sistema x + y = 12 e 2x + y = 20 é:","x = 8 e y = 4",["x = 4 e y = 8","x = 6 e y = 6","x = 10 e y = 2"],"Subtraindo as equações: x = 8; logo y = 4."],
+[M,"O valor de 2³ × 2² é:","32",["16","64","10"],"Soma dos expoentes: 2⁵ = 32."],
+[E,"A doença de Chagas é transmitida principalmente pelo:","Barbeiro (triatomíneo)",["Aedes aegypti","Caramujo","Flebotomíneo"],"Causada pelo Trypanosoma cruzi, também pode ser transmitida por alimentos contaminados e de mãe para filho."],
+[E,"A esquistossomose é adquirida pelo contato com:","Água contaminada com larvas liberadas por caramujos",["Mordida de morcego","Picada de pernilongo","Alimentos mal congelados"],"O saneamento básico é a principal medida preventiva."],
+[E,"Em casos de diarreia, a medida mais importante para evitar a desidratação é:","Oferecer soro de reidratação oral e líquidos",["Suspender toda a ingestão de líquidos","Dar antibiótico sem orientação","Usar laxantes"],"Procurar a unidade de saúde se houver sinais de desidratação."],
+[E,"O sintomático respiratório, em busca ativa de tuberculose, é a pessoa com:","Tosse por três semanas ou mais",["Febre por um dia","Dor de cabeça isolada","Coriza por dois dias"],"Deve ser encaminhada para exame e avaliação."],
+[E,"A hanseníase se manifesta, entre outros sinais, por:","Manchas na pele com perda de sensibilidade",["Manchas que coçam muito e somem em horas","Tosse seca","Dor ao urinar"],"Tem cura, e o tratamento é gratuito no SUS."],
+[E,"Sobre as hepatites virais, é correto afirmar:","Existe vacina para a hepatite B",["Todas se transmitem pelo ar","Não há medidas de prevenção","A hepatite A é transmitida por sangue apenas"],"A hepatite A é fecal-oral, ligada a água e alimentos contaminados."],
+ 
+// ---- Simulado 06: raiva, tétano, crônicas e ISTs
+[P,"Assinale a frase pontuada corretamente:","Maria, agente de saúde, visitou a casa.",["Maria agente, de saúde visitou a casa.","Maria, agente de saúde visitou, a casa.","Maria agente de saúde, visitou a casa."],"O aposto explicativo fica entre vírgulas."],
+[P,"Assinale a grafia correta:","hipertensão",["hipertenção","ipertensão","hipertensaõ"],"A palavra deriva de 'tensão', com 's' e 'ão'."],
+[M,"A razão entre 8 e 20, na forma simplificada, é:","2/5",["4/5","1/2","3/5"],"8/20 dividido por 4 = 2/5."],
+[M,"Um produto de R$ 150 recebe desconto de 20%. O novo preço é:","R$ 120",["R$ 130","R$ 110","R$ 100"],"20% de 150 = 30; 150 − 30 = 120."],
+[E,"Em caso de mordedura por animal suspeito de raiva, o primeiro cuidado é:","Lavar o ferimento com água corrente e sabão e procurar a unidade de saúde",["Apenas passar álcool","Fechar o ferimento com curativo apertado","Aguardar sem fazer nada"],"A avaliação decide sobre soro e vacina antirrábica."],
+[E,"A principal forma de prevenir o tétano é:","Manter a vacinação em dia (dT)",["Evitar luz solar","Usar repelente","Tomar vitaminas"],"A bactéria entra por ferimentos contaminados."],
+[E,"Pressão arterial persistentemente elevada caracteriza:","Hipertensão arterial",["Diabetes","Anemia","Hipotensão"],"Em geral, valores iguais ou acima de 140/90 mmHg, confirmados em medições repetidas."],
+[E,"São sinais clássicos do diabetes:","Muita sede, muita urina, fome excessiva e perda de peso",["Tosse e coriza","Dor de ouvido","Manchas pelo corpo"],"O acompanhamento e a adesão ao tratamento previnem complicações."],
+[E,"A sífilis é causada pela bactéria:","Treponema pallidum",["Vibrio cholerae","Mycobacterium leprae","Clostridium tetani"],"Pode ser tratada com penicilina; na gestação, o tratamento evita a sífilis congênita."],
+[E,"O HIV NÃO se transmite por:","Abraço e compartilhamento de talheres",["Relação sexual sem preservativo","Compartilhamento de seringas","Transmissão vertical (da mãe para o bebê)"],"A transmissão ocorre por sangue, secreções sexuais e leite materno ou gestação."],
+ 
+// ---- Simulado 07: ISTs, saneamento e saúde mental
+[P,"Em 'Se vacine; a proteção é de todos', temos como recurso de coesão:","O ponto e vírgula, que liga ideias relacionadas",["Um erro de pontuação","Um verbo auxiliar","Uma preposição"],"O ponto e vírgula separa orações com relação de sentido próxima."],
+[P,"Assinale a palavra com acentuação correta:","farmácia",["farmacia","fármacia","farmácía"],"É paroxítona terminada em ditongo, e por isso leva acento."],
+[M,"Se 4 agentes concluem um trabalho em 6 dias, 3 agentes, no mesmo ritmo, concluem em:","8 dias",["4,5 dias","9 dias","7 dias"],"Grandezas inversamente proporcionais: 4 × 6 = 3 × x, logo x = 8."],
+[M,"Sendo f(x) = 2x + 3, o valor de f(4) é:","11",["8","14","9"],"2 × 4 + 3 = 11."],
+[E,"A vacina contra o HPV é indicada principalmente para:","Crianças e adolescentes, antes do início da vida sexual",["Somente idosos","Apenas gestantes","Somente quem já tem verrugas"],"Previne cânceres e verrugas associados ao vírus, como o de colo do útero."],
+[E,"Para tornar a água de beber mais segura em casa, deve-se:","Filtrar, ferver ou usar hipoclorito de sódio conforme orientação, e manter a vasilha tampada",["Beber direto da torneira sempre","Guardar em recipientes abertos","Usar água parada de poças"],"O hipoclorito exige tempo de contato (cerca de 30 minutos) antes do consumo."],
+[E,"Diante de uma pessoa com sinais de intenso sofrimento psíquico ou risco de suicídio, o ACS deve:","Escutar sem julgamentos e encaminhar à equipe e à rede de atenção",["Minimizar o problema","Contar o caso a vizinhos","Prometer sigilo absoluto mesmo diante de risco"],"Em risco imediato, acione o SAMU (192) ou o CVV (188), conforme o caso."],
+[E,"A Rede de Atenção Psicossocial (RAPS) inclui:","Os Centros de Atenção Psicossocial (CAPS), a Atenção Básica e serviços de urgência",["Apenas hospitais psiquiátricos","Somente consultórios particulares","Só escolas"],"A atenção é comunitária e em liberdade, articulada em rede."],
+[E,"A principal medida de prevenção da febre amarela é:","A vacinação",["Evitar o contato com animais domésticos","Usar máscara apenas","Beber água filtrada"],"A doença é transmitida por mosquitos e pode ser grave."],
+[E,"O sarampo é prevenido pela vacina:","Tríplice viral",["BCG","dT","Pentavalente"],"A vacina também protege contra caxumba e rubéola."]
+]
+},
+{
+  tema:"rosa", cargo:"Técnico de Enfermagem", banca:"GL Consultoria", nome:"Questões extensas (estilo prova)", size:10,
+  titles:["Segurança do Paciente, Sinais Vitais, Medicação e Procedimentos", "IRAS, Biossegurança, CME, Úlceras por Pressão e Curativos", "Urgência, Cirurgia Segura, Saúde Pública e Ética"],
+  bank:[
+// ---- Simulado 01: segurança do paciente, sinais vitais, medicação e procedimentos
+[P,"Leia o texto a seguir.\n\nA segurança do paciente é um princípio central da assistência de enfermagem. Erros de medicação, quedas e infecções são eventos evitáveis quando a equipe segue protocolos, confere prescrições e registra corretamente os cuidados prestados. Por isso, a comunicação clara entre os profissionais é tão importante quanto a habilidade técnica.\n\nDe acordo com o texto, os eventos evitáveis podem ser prevenidos quando:","a equipe segue protocolos, confere prescrições e registra os cuidados prestados.",["o paciente evita procurar atendimento.","a habilidade técnica dispensa a comunicação.","os registros são feitos somente ao final do mês."],"As condições estão explícitas no segundo período do texto."],
+[P,"Assinale a alternativa em que a concordância está de acordo com a norma-padrão:","Foram administrados os medicamentos prescritos ao paciente no horário correto.",["Foi administrado os medicamentos prescritos ao paciente no horário correto.","Fazem três horas que o paciente recebeu a medicação.","Existe vários pacientes aguardando atendimento na recepção."],"O verbo concorda com o sujeito 'medicamentos' (plural). 'Fazer' (tempo) é impessoal e 'existir' concorda com 'pacientes'."],
+[M,"A prescrição médica é de 750 mg de um antibiótico por via endovenosa. O frasco-ampola disponível contém 1 g (1.000 mg) diluído em 10 mL. O volume a ser aspirado é de:","7,5 mL.",["5 mL.","7 mL.","8,5 mL."],"750 ÷ 1.000 × 10 = 7,5 mL."],
+[M,"Foram prescritos 500 mL de soro fisiológico em 4 horas, em equipo de macrogotas (20 gotas = 1 mL). O gotejamento, em gotas por minuto, é de aproximadamente:","42.",["21.","83.","125."],"500 × 20 = 10.000 gotas em 240 minutos; 10.000 ÷ 240 ≈ 42 gotas/min."],
+[E,"Sobre os sinais vitais, analise as afirmativas a seguir.\n\nI. A frequência cardíaca normal do adulto em repouso varia, em geral, de 60 a 100 batimentos por minuto.\nII. A frequência respiratória normal do adulto em repouso é, em geral, de 12 a 20 incursões por minuto.\nIII. Uma saturação periférica de oxigênio de 85% em ar ambiente é considerada normal.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"A SpO₂ normal em ar ambiente é, em geral, igual ou superior a 95%; 85% indica hipoxemia.",1],
+[E,"Ao preparar uma medicação, o técnico de enfermagem percebe que o nome do paciente na pulseira de identificação é diferente do nome registrado na prescrição. A conduta correta é:","não administrar, confirmar a identificação com a equipe e esclarecer com o enfermeiro ou prescritor antes de prosseguir.",["administrar a medicação mesmo assim, para não atrasar o horário.","confirmar apenas com o acompanhante e administrar.","corrigir o nome na prescrição por conta própria."],"A identificação correta do paciente é uma das metas internacionais de segurança."],
+[E,"O técnico de enfermagem precisa aplicar uma injeção intramuscular em um paciente adulto. Entre as regiões a seguir, a que oferece menor risco de lesão de nervos e vasos calibrosos é a:","região ventroglútea.",["região dorsoglútea.","face posterior do braço.","região plantar."],"A região ventroglútea (de Hochstetter) é considerada a mais segura para adultos."],
+[E,"Durante a infusão venosa periférica, o paciente refere dor e apresenta vermelhidão e edema no local da punção. A conduta adequada é:","interromper a infusão, comunicar o enfermeiro, registrar e avaliar a retirada do acesso conforme o protocolo.",["aumentar o gotejamento para finalizar a infusão.","massagear o local com força.","manter a infusão e ignorar os sinais."],"Os sinais sugerem flebite ou infiltração, que exigem avaliação imediata."],
+[E,"Sobre a administração de dieta enteral por sonda, analise as afirmativas a seguir.\n\nI. A dieta pode ser infundida com o paciente deitado reto, para maior conforto.\nII. A posição da sonda deve ser verificada conforme o protocolo antes de iniciar a dieta.\nIII. Após a administração, a sonda deve ser lavada conforme o protocolo, para evitar obstrução.\n\nEstá(ão) correta(s):","Apenas II e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"A cabeceira deve permanecer elevada (30° a 45°) para reduzir o risco de aspiração.",1],
+[E,"Um paciente está em uso de sonda vesical de demora. Entre as medidas para reduzir o risco de infecção do trato urinário, destaca-se:","manter o sistema fechado e a bolsa coletora abaixo do nível da bexiga, sem contato com o chão.",["desconectar a bolsa sempre que for esvaziá-la.","apoiar a bolsa sobre o abdome do paciente.","trocar a sonda todos os dias, sem indicação."],"Evita-se contaminação e refluxo de urina para a bexiga."],
+ 
+// ---- Simulado 02: IRAS, biossegurança, CME, úlceras por pressão e curativos
+[P,"Leia o texto a seguir.\n\nA higienização das mãos é considerada a medida mais simples e eficaz para prevenir infecções relacionadas à assistência à saúde. Mesmo assim, a adesão dos profissionais ainda é inferior ao desejado, o que exige campanhas educativas e a disponibilização de insumos, como sabonete líquido e preparações alcoólicas, em pontos estratégicos.\n\nSegundo o texto, para melhorar a adesão à higienização das mãos são necessárias:","campanhas educativas e oferta de insumos em pontos estratégicos.",["a redução do número de profissionais.","a proibição do uso de preparações alcoólicas.","a retirada dos lavatórios dos setores."],"As duas medidas são citadas no último trecho do texto."],
+[P,"Assinale a alternativa em que o emprego do sinal indicativo de crase está de acordo com a norma-padrão:","O técnico entregou o relatório à enfermeira responsável pelo plantão.",["Os pacientes chegaram à pé ao hospital.","O técnico referiu-se à todos os pacientes internados.","A visita começa à partir das 14 horas."],"'À enfermeira' = preposição a + artigo a. Não há crase antes de palavra masculina, pronome indefinido ou verbo ('à partir')."],
+[M,"O consumo mensal de luvas de procedimento de um setor era de 400 caixas e aumentou 15%. O novo consumo mensal é de:","460 caixas.",["415 caixas.","455 caixas.","600 caixas."],"15% de 400 = 60; 400 + 60 = 460."],
+[M,"Os tempos de espera, em minutos, de cinco pacientes foram: 10, 25, 15, 25 e 20. A média, a mediana e a moda são, respectivamente:","19, 20 e 25.",["19, 25 e 20.","20, 19 e 25.","19, 15 e 25."],"Soma = 95, média = 19. Ordenando: 10, 15, 20, 25, 25; mediana 20; moda 25."],
+[E,"Sobre a prevenção de infecções relacionadas à assistência à saúde (IRAS), analise as afirmativas a seguir.\n\nI. A higienização das mãos é a principal medida de prevenção das IRAS.\nII. O uso de luvas substitui a higienização das mãos.\nIII. As mãos devem ser higienizadas antes e após o contato com o paciente.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"As luvas não dispensam a higienização das mãos antes e depois do uso.",1],
+[E,"Ao realizar um procedimento, um técnico de enfermagem se fere com uma agulha usada em paciente de sorologia desconhecida. As condutas imediatas corretas são:","lavar o local com água e sabão, comunicar a chefia e procurar o serviço de referência para avaliação e profilaxia, com notificação do acidente.",["espremer o local e continuar o plantão sem relatar.","apenas fazer um curativo e aguardar sintomas.","aplicar álcool e ignorar o ocorrido."],"A avaliação precoce aumenta a eficácia da profilaxia pós-exposição (NR-32)."],
+[E,"Antes de realizar a aspiração de vias aéreas em um paciente com secreção abundante, o técnico de enfermagem deve utilizar, de acordo com a biossegurança:","luvas, avental, máscara e óculos de proteção ou protetor facial.",["apenas luvas.","apenas touca.","somente máscara."],"O conjunto protege contra respingos de secreções e outros fluidos."],
+[E,"Sobre a Central de Material e Esterilização (CME), analise as afirmativas a seguir.\n\nI. O fluxo de trabalho pode ser livre, sem separação entre áreas suja e limpa.\nII. O indicador biológico é o que oferece maior segurança no monitoramento da esterilização.\nIII. A autoclave esteriliza materiais por meio de vapor saturado sob pressão.\n\nEstá(ão) correta(s):","Apenas II e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"A RDC nº 15/2012 exige fluxo unidirecional, da área suja para a limpa.",1],
+[E,"Um paciente acamado há 10 dias apresenta, na região sacral, área avermelhada que não empalidece à pressão, com pele íntegra. Esse achado é compatível com úlcera por pressão em estágio 1. A conduta adequada do técnico é:","comunicar o enfermeiro, aliviar a pressão por meio da mudança de decúbito e manter a pele limpa e hidratada.",["massagear vigorosamente a área.","manter o paciente na mesma posição.","aplicar calor local intenso."],"A intervenção precoce evita a progressão para estágios mais graves."],
+[E,"Na realização de curativo em ferida operatória limpa, o técnico de enfermagem deve:","higienizar as mãos, usar técnica asséptica, limpar da incisão para a periferia e registrar o aspecto da ferida.",["limpar da periferia para a incisão com a mesma gaze.","reutilizar materiais de outro paciente.","dispensar o uso de luvas."],"Limpa-se da área menos contaminada para a mais contaminada."],
+ 
+// ---- Simulado 03: urgência, cirurgia, saúde pública e ética
+[P,"Leia o texto a seguir.\n\nNas situações de urgência, a rapidez do atendimento pode determinar a sobrevida do paciente. Por isso, a equipe deve reconhecer precocemente os sinais de gravidade, acionar o serviço especializado e iniciar as manobras de suporte básico enquanto aguarda a chegada do socorro, sempre priorizando a segurança da cena.\n\nDe acordo com o texto, durante a espera pelo socorro especializado, a equipe deve:","iniciar as manobras de suporte básico, priorizando a segurança da cena.",["aguardar passivamente, sem nenhuma ação.","evitar acionar o serviço especializado.","ignorar os sinais de gravidade."],"A orientação aparece no final do trecho."],
+[P,"Assinale a alternativa em que a pontuação está de acordo com a norma-padrão:","O paciente, que estava inconsciente, foi levado imediatamente à sala de emergência.",["O paciente que, estava inconsciente foi levado imediatamente à sala de emergência.","O paciente, que estava inconsciente foi levado, imediatamente à sala de emergência.","O paciente que estava inconsciente, foi levado imediatamente, à sala de emergência."],"A oração explicativa fica entre vírgulas; não se separa sujeito de verbo."],
+[M,"Uma rampa de 5 m de comprimento termina em uma plataforma situada a 3 m de distância horizontal do início da rampa. A altura da plataforma é de:","4 m.",["2 m.","3 m.","5 m."],"Pitágoras: 5² = 3² + h², logo h² = 16 e h = 4."],
+[M,"Em um plantão, 6 técnicos realizam 90 curativos em 5 horas, no mesmo ritmo. Mantido esse ritmo por técnico, o número de curativos realizados por 9 técnicos em 4 horas é de:","108.",["120.","96.","135."],"Cada técnico faz 3 curativos por hora (90 ÷ 30). Então 9 × 4 × 3 = 108."],
+[E,"Sobre a ressuscitação cardiopulmonar (RCP) em adultos, analise as afirmativas a seguir.\n\nI. Recomenda-se realizar compressões torácicas em frequência de 100 a 120 por minuto.\nII. A profundidade recomendada é de, aproximadamente, 5 cm, sem exceder 6 cm.\nIII. Deve-se interromper as compressões por vários minutos para verificar o pulso.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"As interrupções devem ser mínimas, e o tórax deve retornar completamente entre as compressões.",1],
+[E,"Um paciente apresenta crise convulsiva generalizada. A conduta adequada da equipe é:","proteger a cabeça, afastar objetos, não conter os movimentos nem colocar nada na boca, posicionar em decúbito lateral após a crise e registrar a duração e as características.",["segurar o paciente com força para interromper a crise.","colocar um objeto na boca para evitar mordedura da língua.","oferecer água durante a crise."],"A prioridade é evitar traumas e proteger as vias aéreas."],
+[E,"Um paciente de 68 anos apresenta, de início súbito, desvio da rima labial, fraqueza no braço direito e dificuldade para falar. A conduta inicial mais adequada é:","acionar imediatamente o serviço de urgência (SAMU 192), registrar o horário de início dos sintomas e manter o paciente em observação.",["orientar o paciente a repousar e observar por 24 horas.","oferecer alimentos e líquidos para recuperar a força.","aguardar o dia seguinte para agendar consulta."],"Os sinais sugerem AVC, e o tempo até o tratamento é decisivo."],
+[E,"Sobre o protocolo de cirurgia segura e o pós-operatório, analise as afirmativas a seguir.\n\nI. O checklist de cirurgia segura deve ser aplicado apenas ao final do procedimento.\nII. No pós-operatório imediato, devem ser monitorados sinais vitais, nível de consciência, dor e sangramentos.\nIII. Drenos e curativos devem ser observados quanto à permeabilidade e a sinais de sangramento.\n\nEstá(ão) correta(s):","Apenas II e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"O checklist é aplicado antes da indução anestésica, antes da incisão e antes de o paciente deixar a sala.",1],
+[E,"Durante o atendimento, o técnico de enfermagem suspeita de maus-tratos em uma criança com lesões sem explicação plausível. De acordo com o ECA, a conduta adequada é:","comunicar a equipe e o Conselho Tutelar, e registrar os achados de forma objetiva.",["aguardar a confirmação por perícia para comunicar.","orientar a família a não procurar mais o serviço.","manter o caso em segredo da equipe."],"A comunicação da suspeita é obrigatória."],
+[E,"O técnico de enfermagem percebe que um colega registrou no prontuário um procedimento que não executou. Com base no Código de Ética dos Profissionais de Enfermagem (Resolução COFEN nº 564/2017), a conduta correta é:","não compactuar, comunicar o enfermeiro responsável ou a chefia e zelar pela veracidade dos registros.",["omitir o fato para proteger o colega.","fazer o mesmo registro para manter a harmonia da equipe.","ignorar, pois o registro não tem valor legal."],"O prontuário é documento legal, e o registro deve ser fiel."]
+]
+},
+{
+  tema:"rosa", cargo:"Técnico de Enfermagem", banca:"GL Consultoria", nome:"Questões objetivas curtas", size:10,
+  titles:["Fundamentos e Sinais Vitais", "Administração de Medicamentos", "Técnicas Básicas: Venóclise, Sondas e Oxigenoterapia", "Curativos, Úlceras por Pressão, IRAS e Biossegurança", "Perfurocortantes e Central de Material (CME)", "Cirurgia Segura, Urgência e Emergência", "Saúde Pública, Ética e Registros"],
+  bank:[
+// ---- Simulado 01: Fundamentos e Sinais Vitais
+[P,"Em 'Vacine-se hoje!', predomina a função da linguagem:","Conativa (apelativa)",["Referencial","Emotiva","Poética"],"O texto procura levar o leitor a agir, característica da função conativa."],
+[P,"Em 'Estou morrendo de fome', há a figura de linguagem:","Hipérbole",["Metáfora","Eufemismo","Ironia"],"A hipérbole exagera a ideia para dar ênfase."],
+[M,"Um capital de R$ 1.000 aplicado a juros simples de 2% ao mês durante 5 meses rende de juros:","R$ 100",["R$ 10","R$ 110","R$ 200"],"J = C × i × t = 1.000 × 0,02 × 5 = 100."],
+[M,"Em uma comunidade de 2.000 pessoas, 15% são crianças. Quantas são crianças?","300",["150","200","350"],"0,15 × 2.000 = 300."],
+[E,"Os valores normais de frequência cardíaca de um adulto em repouso situam-se entre:","60 e 100 batimentos por minuto",["30 e 50 bpm","100 e 140 bpm","120 e 160 bpm"],"Abaixo de 60 é bradicardia; acima de 100, taquicardia."],
+[E,"A frequência respiratória normal de um adulto em repouso é de:","12 a 20 incursões por minuto",["6 a 10","25 a 35","40 a 60"],"Acima de 20 é taquipneia; abaixo de 12, bradipneia."],
+[E,"A saturação periférica de oxigênio (SpO₂) considerada normal em ar ambiente é, em geral:","95% ou mais",["85%","75%","60%"],"Valores baixos indicam hipoxemia e exigem avaliação imediata."],
+[E,"A antissepsia é:","O uso de antissépticos na pele ou mucosas para reduzir microrganismos",["A esterilização de instrumentos cirúrgicos","A limpeza do piso","O uso de EPIs"],"Aplica-se a tecidos vivos; a esterilização se aplica a artigos."],
+[E,"A higienização das mãos com água e sabão deve durar:","De 40 a 60 segundos",["5 a 10 segundos","10 a 15 segundos","2 a 3 minutos"],"Com preparação alcoólica, a fricção dura de 20 a 30 segundos."],
+[E,"Para aferir o peso de um paciente adulto em balança, deve-se:","Usar balança calibrada e zerada, com o paciente de roupas leves e sem calçados",["Pesar com casaco e sapatos","Usar balança sem zerar","Estimar visualmente"],"Garante precisão, importante para cálculo de doses."],
+ 
+// ---- Simulado 02: Administração de Medicamentos
+[P,"Um folheto que ensina como prevenir a dengue é um texto predominantemente:","Injuntivo (instrucional)",["Narrativo","Poético","Descritivo"],"Orienta e instrui o leitor sobre como agir."],
+[P,"A palavra 'infelizmente' é formada por:","Derivação prefixal e sufixal",["Composição por justaposição","Composição por aglutinação","Onomatopeia"],"in- (prefixo) + feliz + -mente (sufixo)."],
+[M,"Se 3 agentes visitam 90 casas em 5 dias, 6 agentes visitam 180 casas em:","5 dias",["10 dias","2,5 dias","6 dias"],"Regra de três composta: dobrando agentes e casas, o prazo se mantém."],
+[M,"As raízes da equação x² − 5x + 6 = 0 são:","2 e 3",["1 e 6","−2 e −3","5 e 6"],"Soma = 5 e produto = 6, logo as raízes são 2 e 3."],
+[E,"Fazem parte dos 'certos' da administração de medicamentos:","Paciente, medicamento, dose, via e hora certos",["Paciente, diagnóstico e horário de visita","Médico, dose e laboratório","Somente dose e via"],"Há também registro, orientação e forma certos."],
+[E,"Prescrição: 500 mg. Disponível: ampola de 250 mg em 2 mL. O volume a aspirar é:","4 mL",["2 mL","3 mL","1 mL"],"500 ÷ 250 = 2 ampolas; 2 × 2 mL = 4 mL."],
+[E,"Prescrição de 600 mL de soro em 4 horas. O gotejamento em macrogotas é de:","50 gotas por minuto",["40 gotas/min","30 gotas/min","60 gotas/min"],"Gotas/min = volume ÷ (tempo em horas × 3) = 600 ÷ 12 = 50."],
+[E,"A região indicada para injeção intramuscular por oferecer menor risco de lesão de nervos e vasos é:","A ventroglútea (de Hochstetter)",["A dorsoglútea","A face posterior do braço","A região plantar"],"É a mais segura para adultos, segundo a literatura da enfermagem."],
+[E,"A via subcutânea é utilizada, por exemplo, para:","Insulina e heparina",["Nutrição parenteral total","Dietas enterais","Soros de grande volume"],"São pequenos volumes, de absorção lenta."],
+[E,"Diante de um erro de medicação, o profissional deve:","Comunicar imediatamente a chefia e a equipe, observar o paciente e registrar o evento",["Ocultar para evitar punições","Corrigir sem avisar ninguém","Apagar o registro"],"A notificação protege o paciente e permite aprender com o erro."],
+ 
+// ---- Simulado 03: Técnicas Básicas: Venóclise, Sondas e Oxigenoterapia
+[P,"Em 'Os agentes visitaram as famílias', o sujeito é:","Simples: 'Os agentes'",["Oculto","Indeterminado","Inexistente"],"Está explícito e tem um só núcleo ('agentes')."],
+[P,"Assinale a frase correta quanto à concordância:","Vendem-se casas nesse bairro.",["Vende-se casas nesse bairro.","Houveram muitas visitas ontem.","Fazem três anos que me mudei."],"Na voz passiva sintética o verbo concorda com o sujeito ('casas'); 'haver' e 'fazer' (tempo) são impessoais."],
+[M,"Em um sorteio entre 20 famílias, 5 têm gestantes. A probabilidade de sortear uma família com gestante é:","1/4",["1/5","1/2","5/4"],"5/20 = 1/4."],
+[M,"A média geométrica entre 4 e 9 é:","6",["6,5","13","36"],"√(4 × 9) = √36 = 6."],
+[E,"Antes de uma punção venosa periférica, deve-se:","Higienizar as mãos, calçar luvas de procedimento e fazer antissepsia do local",["Dispensar as luvas","Puncionar sem antissepsia","Reencapar a agulha"],"Reduz o risco de infecção do acesso."],
+[E,"São sinais de flebite:","Dor, calor, vermelhidão e edema ao longo da veia puncionada",["Palidez e frio no braço oposto","Tosse","Sudorese na testa"],"Se houver sinais, comunicar e retirar o acesso conforme protocolo."],
+[E,"O método mais seguro para confirmar o posicionamento de sonda enteral antes de iniciar a dieta é:","A radiografia",["Apenas perguntar ao paciente","Observar a cor da pele","Soprar ar sem ausculta"],"A ausculta isolada não é considerada segura."],
+[E,"Para prevenir infecção do trato urinário em paciente com sonda vesical de demora, deve-se:","Manter o sistema fechado e a bolsa coletora abaixo do nível da bexiga",["Desconectar a bolsa para facilitar a higiene","Apoiar a bolsa no chão","Elevar a bolsa acima da bexiga"],"Evita contaminação e refluxo de urina."],
+[E,"Durante a oxigenoterapia, é correto:","Manter o ambiente livre de chamas e faíscas, pois o oxigênio favorece a combustão",["Permitir fumar no quarto","Usar óleo nas conexões","Dispensar prescrição"],"O oxigênio é tratado como medicamento e exige prescrição."],
+[E,"Durante a administração de dieta enteral, o paciente deve permanecer:","Com a cabeceira elevada (30° a 45°)",["Deitado totalmente reto","Em posição de Trendelenburg","Com a cabeceira abaixada"],"Reduz o risco de refluxo e de aspiração."],
+ 
+// ---- Simulado 04: Curativos, Úlceras por Pressão, IRAS e Biossegurança
+[P,"Em 'A dengue é grave; portanto, é preciso prevenir', o conectivo 'portanto' indica:","Conclusão",["Oposição","Causa","Adição"],"Introduz a consequência do que foi afirmado antes."],
+[P,"Na frase 'O ACS é o elo entre a comunidade e a equipe de saúde', a ideia central é:","O ACS faz a ligação entre a comunidade e a equipe",["O ACS substitui o médico","O ACS trabalha isolado","O ACS só cadastra famílias"],"'Elo' indica ligação entre as duas partes."],
+[M,"O valor de sen 30° é:","1/2",["√3/2","√2/2","1"],"É um valor notável da trigonometria."],
+[M,"Uma caixa d'água cúbica de 2 m de aresta tem volume de:","8 m³ (8.000 litros)",["4 m³","6 m³","16 m³"],"V = 2 × 2 × 2 = 8 m³; 1 m³ = 1.000 L."],
+[E,"Na realização de curativos, a limpeza deve seguir a direção:","Da área mais limpa para a mais contaminada",["Da mais contaminada para a mais limpa","Aleatória","Sempre de baixo para cima"],"Evita contaminar a área limpa."],
+[E,"Uma medida importante na prevenção de úlceras por pressão é:","Mudança de decúbito conforme o plano de cuidado (em geral, a cada 2 horas)",["Deixar o paciente na mesma posição","Massagear áreas ósseas com força","Usar lençóis com dobras"],"Também se avalia a pele e se alivia a pressão sobre proeminências ósseas."],
+[E,"A úlcera por pressão em estágio 1 caracteriza-se por:","Pele íntegra com eritema que não desaparece à pressão",["Perda total da pele com osso exposto","Bolhas com secreção purulenta","Pele pálida e fria apenas"],"É o estágio inicial, em que a intervenção precoce evita a progressão."],
+[E,"A principal medida para prevenir infecções relacionadas à assistência à saúde (IRAS) é:","A higienização das mãos",["Usar luvas em vez de lavar as mãos","Evitar o contato com o paciente","Usar o mesmo material em vários pacientes"],"Deve ser feita nos cinco momentos recomendados pela OMS."],
+[E,"A NR-32 trata de:","Segurança e saúde no trabalho em serviços de saúde",["Segurança em minas","Trabalho em altura","Serviços de eletricidade"],"Prevê medidas contra riscos biológicos, químicos e físicos."],
+[E,"Para proteção contra respingos de sangue e secreções, o conjunto de EPIs adequado inclui:","Luvas, avental, máscara e óculos de proteção",["Apenas touca","Apenas sapato fechado","Somente luvas"],"O tipo de EPI depende do risco da atividade."],
+ 
+// ---- Simulado 05: Perfurocortantes e Central de Material (CME)
+[P,"Assinale a frase em que há regência e crase corretas:","Chegamos ao posto de saúde às oito horas.",["Chegamos no posto de saúde às oito horas.","Chegamos ao posto de saúde as oito horas.","Chegamos em o posto de saúde às oito horas."],"'Chegar' pede a preposição 'a'; antes de hora feminina há crase."],
+[P,"Assinale a frase em que a crase está correta:","Fui à unidade de saúde ontem.",["Fui à pé até a unidade.","Vou à visitar as famílias.","Refiro-me à elas."],"'À unidade' = a + a. Não há crase antes de palavra masculina, verbo ou pronome pessoal."],
+[M,"A solução do sistema x + y = 12 e 2x + y = 20 é:","x = 8 e y = 4",["x = 4 e y = 8","x = 6 e y = 6","x = 10 e y = 2"],"Subtraindo as equações: x = 8; logo y = 4."],
+[M,"O valor de 2³ × 2² é:","32",["16","64","10"],"Soma dos expoentes: 2⁵ = 32."],
+[E,"Após acidente com material perfurocortante, a conduta imediata é:","Lavar o local com água e sabão, comunicar a chefia e buscar atendimento para avaliação e profilaxia",["Espremer o local até sangrar muito","Ignorar se o ferimento for pequeno","Esperar para comunicar no dia seguinte"],"Quanto antes a avaliação, melhor a eficácia da profilaxia."],
+[E,"Quanto aos perfurocortantes, é correto:","Descartar em recipiente rígido e resistente, sem reencapar agulhas",["Reencapar a agulha com as duas mãos","Descartar em saco comum","Encher o coletor além do limite"],"Respeitar o limite de enchimento (2/3) do coletor."],
+[E,"A RDC nº 15/2012 da ANVISA dispõe sobre:","Boas práticas para o processamento de produtos para saúde, como na CME",["Vigilância de alimentos","Registro de medicamentos","Controle de propaganda"],"Regula o funcionamento das Centrais de Material e Esterilização."],
+[E,"O fluxo de trabalho na Central de Material e Esterilização (CME) deve ser:","Unidirecional, da área suja para a área limpa",["Livre, sem sentido definido","Da área limpa para a suja","Circular, com cruzamento de materiais"],"Evita a contaminação cruzada entre materiais sujos e estéreis."],
+[E,"O monitoramento da esterilização com maior segurança é feito pelo indicador:","Biológico",["Apenas visual","De fita zebrada","De cor do invólucro"],"Usa esporos resistentes para provar a eficácia do processo."],
+[E,"O indicador químico (como a fita de autoclave) informa que:","O pacote foi exposto ao processo, mas não comprova esterilização por si só",["O material está estéril com certeza absoluta","A autoclave está limpa","O produto não tem prazo de validade"],"É complementar ao indicador biológico."],
+ 
+// ---- Simulado 06: Cirurgia Segura, Urgência e Emergência
+[P,"Assinale a frase pontuada corretamente:","Maria, agente de saúde, visitou a casa.",["Maria agente, de saúde visitou a casa.","Maria, agente de saúde visitou, a casa.","Maria agente de saúde, visitou a casa."],"O aposto explicativo fica entre vírgulas."],
+[P,"Assinale a grafia correta:","hipertensão",["hipertenção","ipertensão","hipertensaõ"],"A palavra deriva de 'tensão', com 's' e 'ão'."],
+[M,"A razão entre 8 e 20, na forma simplificada, é:","2/5",["4/5","1/2","3/5"],"8/20 dividido por 4 = 2/5."],
+[M,"Um produto de R$ 150 recebe desconto de 20%. O novo preço é:","R$ 120",["R$ 130","R$ 110","R$ 100"],"20% de 150 = 30; 150 − 30 = 120."],
+[E,"O checklist de cirurgia segura da OMS é aplicado em três momentos:","Antes da indução anestésica, antes da incisão e antes de o paciente deixar a sala",["Apenas na alta","Somente após a cirurgia","Só antes da internação"],"Reduz erros como cirurgia no local ou paciente errado."],
+[E,"No pós-operatório imediato, deve-se observar:","Sinais vitais, nível de consciência, dor, sangramentos e permeabilidade de drenos",["Apenas o apetite","Somente a cor do lençol","Nada, até a alta"],"A vigilância precoce detecta complicações."],
+[E,"São sinais de alerta de AVC:","Desvio da boca, fraqueza em um lado do corpo e dificuldade para falar",["Dor de dente","Tosse seca","Coceira generalizada"],"É emergência: acionar imediatamente o atendimento (SAMU 192)."],
+[E,"Nas compressões torácicas em adultos, segundo a AHA, a frequência e a profundidade recomendadas são:","100 a 120 por minuto e cerca de 5 cm (sem passar de 6 cm)",["60 por minuto e 2 cm","140 por minuto e 8 cm","80 por minuto e 1 cm"],"Permitir o retorno completo do tórax e minimizar interrupções."],
+[E,"Em hemorragia externa, o primeiro cuidado é:","Realizar compressão direta no local com gaze ou pano limpo e acionar o socorro",["Retirar objetos cravados","Aplicar pó de café","Dar líquidos ao paciente"],"Se encharcar, sobrepor outro pano sem retirar o primeiro."],
+[E,"Durante uma convulsão, deve-se:","Proteger a cabeça, afastar objetos e não colocar nada na boca",["Segurar a pessoa com força","Colocar uma colher na boca","Dar água"],"Após a crise, posicionar de lado e avaliar a respiração."],
+ 
+// ---- Simulado 07: Saúde Pública, Ética e Registros
+[P,"Em 'Se vacine; a proteção é de todos', temos como recurso de coesão:","O ponto e vírgula, que liga ideias relacionadas",["Um erro de pontuação","Um verbo auxiliar","Uma preposição"],"O ponto e vírgula separa orações com relação de sentido próxima."],
+[P,"Assinale a palavra com acentuação correta:","farmácia",["farmacia","fármacia","farmácía"],"É paroxítona terminada em ditongo, e por isso leva acento."],
+[M,"Se 4 agentes concluem um trabalho em 6 dias, 3 agentes, no mesmo ritmo, concluem em:","8 dias",["4,5 dias","9 dias","7 dias"],"Grandezas inversamente proporcionais: 4 × 6 = 3 × x, logo x = 8."],
+[M,"Sendo f(x) = 2x + 3, o valor de f(4) é:","11",["8","14","9"],"2 × 4 + 3 = 11."],
+[E,"Na Rede de Frio do Programa Nacional de Imunizações, as vacinas devem ser mantidas, em geral, entre:","+2 °C e +8 °C",["−10 °C e 0 °C","+15 °C e +25 °C","+30 °C e +40 °C"],"A temperatura é monitorada e registrada diariamente."],
+[E,"Segundo o ECA, a suspeita de maus-tratos contra criança ou adolescente deve ser:","Obrigatoriamente comunicada ao Conselho Tutelar",["Mantida em sigilo da rede","Comunicada apenas se confirmada por perícia","Ignorada se a família negar"],"A comunicação é dever legal dos profissionais de saúde."],
+[E,"O exame preventivo do câncer do colo do útero (Papanicolau) é indicado, em geral, para mulheres de:","25 a 64 anos que já iniciaram a vida sexual",["10 a 15 anos","70 a 90 anos apenas","Qualquer idade, só se houver sintomas"],"Segue a recomendação do Ministério da Saúde."],
+[E,"O teste rápido para HIV oferecido no SUS deve ser acompanhado de:","Aconselhamento e garantia de confidencialidade",["Divulgação do resultado à família","Cobrança de taxa","Isolamento do paciente"],"O resultado reagente exige confirmação e encaminhamento ao serviço."],
+[E,"Segundo o Código de Ética dos Profissionais de Enfermagem (Resolução COFEN nº 564/2017), é dever do profissional:","Guardar sigilo sobre as informações do paciente, salvo nos casos previstos em lei",["Divulgar casos nas redes sociais","Executar atos para os quais não está habilitado","Omitir erros da equipe"],"O sigilo protege a dignidade e a privacidade do paciente."],
+[E,"O registro de enfermagem no prontuário deve ser:","Claro, legível, completo, com data, hora, assinatura e identificação do profissional",["Feito a lápis","Corrigido com corretivo","Sem identificação"],"É documento legal e instrumento de comunicação da equipe."]
+]
+},
+{
+  tema:"laranja", cargo:"Profissional Transpetro Nível Médio - Ênfase 1: Administração e Controle", banca:"Cesgranrio", nome:"Simulados no formato da prova (5 alternativas)", size:12,
+  titles:["RH, Sistema de Gestão Integrado e Riscos", "Patrimônio, Manutenção e Indicadores", "Finanças e Contabilidade", "Logística, Estoques e Armazenagem", "Compras, Licitações, Contratos e Informática"],
+  bank:[
+// ---- Simulado 01: RH, Sistema de Gestão Integrado e Riscos
+[P,"Assinale a frase em que a concordância está de acordo com a norma-padrão:","Devem ser avaliadas as propostas dos fornecedores.",["Deve ser avaliadas as propostas dos fornecedores.","Fazem dois anos que o contrato foi assinado.","Existe falhas no processo de compras.","Mais de um fornecedor foram desclassificados."],"Na voz passiva sintética, o verbo concorda com o sujeito ('propostas'). 'Fazer' (tempo) é impessoal e 'existir' concorda com 'falhas'."],
+[P,"Assinale a alternativa em que a palavra está grafada de acordo com a norma:","autoavaliação",["auto-avaliação","auto avaliação","autoavalição","autoávaliação"],"Prefixo terminado em vogal + palavra iniciada por vogal diferente: sem hífen."],
+[M,"De um grupo de 6 pessoas, quer-se formar uma comissão de 3. Quantas comissões distintas é possível formar?","20",["18","30","120","216"],"Combinação: C(6,3) = 6! ÷ (3! × 3!) = 20."],
+[M,"Oito máquinas produzem 480 peças em 6 horas. Doze máquinas, no mesmo ritmo, produzem em 4 horas:","480 peças",["320 peças","540 peças","720 peças","360 peças"],"Cada máquina produz 10 peças por hora; 12 × 4 × 10 = 480."],
+[E,"Quando uma vaga é preenchida por um empregado já pertencente à empresa, trata-se de recrutamento:","Interno",["Externo","Misto exclusivamente","Terceirizado","Eletrônico apenas"],"O recrutamento interno valoriza o quadro atual e favorece a carreira."],
+[E,"Em gestão de pessoas, o treinamento tem foco, em geral, em:","Capacitar para tarefas e necessidades atuais do cargo",["Preparar apenas para cargos de diretoria","Substituir a avaliação de desempenho","Reduzir o número de cargos","Definir salários"],"O desenvolvimento tem foco mais amplo e de longo prazo."],
+[E,"A avaliação de desempenho 360 graus caracteriza-se por:","Receber feedback de várias fontes (chefia, pares, subordinados e o próprio avaliado)",["Ser feita apenas pela chefia","Ser feita só pelo RH","Avaliar apenas resultados financeiros","Ser anônima e sem critérios"],"Amplia a visão sobre o desempenho."],
+[E,"A descrição de cargo, no plano de cargos e carreira, serve para:","Definir atribuições, responsabilidades e requisitos do cargo",["Registrar a frequência diária","Calcular depreciação","Definir o layout do armazém","Controlar estoques"],"É base para recrutamento, avaliação e remuneração."],
+[E,"A gestão por competências considera que competência é a combinação de:","Conhecimentos, habilidades e atitudes",["Cargo, salário e benefício","Metas, orçamento e prazo","Idade, tempo de casa e escolaridade","Normas, auditorias e indicadores"],"É o conhecido CHA."],
+[E,"O ciclo PDCA, aplicado à melhoria contínua, é composto por:","Planejar, executar, verificar e agir",["Produzir, distribuir, controlar e arquivar","Prever, decidir, comprar e armazenar","Planejar, dividir, contratar e auditar","Parar, discutir, corrigir e avisar"],"Plan, Do, Check, Act."],
+[E,"A auditoria interna em um sistema de gestão integrado tem como finalidade:","Verificar a conformidade dos processos com requisitos e identificar oportunidades de melhoria",["Punir os empregados","Substituir a certificação externa","Aprovar compras","Calcular tributos"],"Gera ações corretivas e preventivas."],
+[E,"Na gestão de riscos, o nível de risco é frequentemente estimado combinando:","Probabilidade de ocorrência e impacto",["Custo e prazo apenas","Estoque e demanda","Receita e despesa","Quantidade e preço"],"A matriz de risco cruza probabilidade e consequência."],
+ 
+// ---- Simulado 02: Patrimônio, Manutenção e Indicadores
+[P,"Assinale a frase em que o sinal indicativo de crase está empregado corretamente:","O gerente referiu-se à proposta apresentada.",["O gerente referiu-se à todos os fornecedores.","Os pagamentos começam à partir de segunda.","Fomos à pé até o almoxarifado.","Ele não obedeceu à ordens superiores."],"'Referir-se' pede 'a' e 'proposta' admite artigo: a + a = à. Não há crase antes de pronome indefinido plural, verbo, palavra masculina ou substantivo plural sem artigo."],
+[P,"Assinale a frase pontuada corretamente:","Os fornecedores, que estavam atrasados, foram notificados.",["Os fornecedores que, estavam atrasados foram notificados.","Os fornecedores, que estavam atrasados foram, notificados.","Os fornecedores que estavam, atrasados, foram notificados.","Os, fornecedores que estavam atrasados, foram notificados."],"A oração explicativa fica entre vírgulas e não se separa sujeito de verbo."],
+[M,"O número de anagramas da palavra LIVRO é:","120",["25","60","24","720"],"Permutação de 5 letras distintas: 5! = 120."],
+[M,"O valor de log₂ 64 é:","6",["5","8","32","4"],"2⁶ = 64."],
+[E,"O inventário patrimonial tem por objetivo:","Conferir e atualizar a existência, o estado e a localização dos bens",["Calcular impostos","Contratar fornecedores","Definir salários","Planejar rotas"],"Confronta os registros com os bens físicos."],
+[E,"Um bem adquirido por R$ 12.000, com vida útil de 10 anos e valor residual de R$ 2.000, tem depreciação anual (método linear) de:","R$ 1.000",["R$ 1.200","R$ 200","R$ 2.000","R$ 10.000"],"(12.000 − 2.000) ÷ 10 = 1.000."],
+[E,"Em geral, bens de caráter permanente (como máquinas e equipamentos) diferem dos materiais de consumo porque:","Têm durabilidade e não se extinguem com o uso",["São consumidos rapidamente","Não têm valor","Não precisam de controle","São sempre alugados"],"Por isso entram no controle patrimonial e na depreciação."],
+[E,"A manutenção preventiva é aquela:","Realizada em intervalos planejados, para reduzir a probabilidade de falhas",["Feita apenas após a quebra","Que dispensa planejamento","Que substitui toda a equipe","Que só ocorre em feriados"],"A corretiva é feita após a falha."],
+[E,"A manutenção preditiva baseia-se em:","Monitoramento das condições do equipamento (vibração, temperatura etc.) para prever falhas",["Esperar o defeito ocorrer","Trocar peças sem critério","Calendário fixo, sem medições","Contratar mais mecânicos"],"A intervenção ocorre quando os dados indicam necessidade."],
+[E,"Na sigla ESG, a letra 'G' refere-se à:","Governança",["Gestão de estoques","Geração de caixa","Garantia de qualidade","Globalização"],"E: ambiental, S: social, G: governança."],
+[E,"Um bom indicador de desempenho deve ser:","Mensurável, com meta, periodicidade e responsável definidos",["Subjetivo e sem meta","Calculado uma vez na vida","Sem fonte de dados","Conhecido só pela diretoria"],"Permite acompanhar resultados e apoiar decisões."],
+[E,"A gestão de ativos, em seu ciclo de vida, envolve:","Aquisição, operação, manutenção e baixa ou descarte",["Apenas a compra","Somente a venda","Apenas a depreciação","Somente o seguro"],"Visa otimizar custo, desempenho e risco."],
+ 
+// ---- Simulado 03: Finanças e Contabilidade
+[P,"Em 'O custo caiu; contudo, a qualidade se manteve', o conectivo 'contudo' estabelece uma relação de:","Oposição",["Causa","Conclusão","Finalidade","Adição"],"'Contudo' é conjunção adversativa: introduz ideia contrária à esperada."],
+[P,"Em 'Os resultados foram bastante positivos', a palavra 'bastante' é:","Advérbio de intensidade",["Adjetivo","Pronome indefinido","Substantivo","Conjunção"],"Modifica o adjetivo 'positivos' e não varia."],
+[M,"Lançando dois dados honestos, a probabilidade de a soma ser 7 é:","1/6",["1/12","1/9","7/36","1/36"],"São 6 resultados favoráveis em 36 possíveis: 6/36 = 1/6."],
+[M,"A mediana do conjunto 8, 3, 5, 9, 5 é:","5",["6","8","5,5","3"],"Em ordem: 3, 5, 5, 8, 9; o valor central é 5."],
+[E,"Um capital de R$ 2.000, a juros simples de 3% ao mês, durante 4 meses, rende de juros:","R$ 240",["R$ 60","R$ 120","R$ 2.240","R$ 250"],"J = 2.000 × 0,03 × 4 = 240."],
+[E,"O montante de R$ 1.000 a juros compostos de 10% ao ano, por 2 anos, é:","R$ 1.210",["R$ 1.200","R$ 1.100","R$ 1.220","R$ 1.021"],"1.000 × 1,1² = 1.210."],
+[E,"Um título de R$ 1.000 é descontado 3 meses antes do vencimento, com desconto comercial simples de 2% ao mês. O desconto é de:","R$ 60",["R$ 20","R$ 30","R$ 940","R$ 6"],"D = 1.000 × 0,02 × 3 = 60."],
+[E,"A equação fundamental do Balanço Patrimonial é:","Ativo = Passivo + Patrimônio Líquido",["Ativo = Receita − Despesa","Passivo = Ativo + Patrimônio Líquido","Patrimônio Líquido = Passivo + Ativo","Ativo = Passivo − Patrimônio Líquido"],"O Ativo é financiado por capitais de terceiros e próprios."],
+[E,"Na DRE, com receita líquida de R$ 500, CMV de R$ 300 e despesas operacionais de R$ 120, o resultado operacional é de:","R$ 80",["R$ 200","R$ 380","R$ 120","R$ 500"],"Lucro bruto = 200; 200 − 120 = 80."],
+[E,"Segundo o princípio contábil da competência, receitas e despesas devem ser reconhecidas:","No período em que ocorrem, independentemente do pagamento ou recebimento",["Somente quando houver pagamento","Quando houver sobra de caixa","No fim do ano apenas","Quando o auditor solicitar"],"O regime de caixa leva em conta a movimentação financeira."],
+[E,"O fluxo de caixa pelo método direto apresenta:","Os recebimentos e pagamentos efetivos do período",["Apenas o lucro líquido ajustado","Somente os ativos fixos","O balanço do ano anterior","A depreciação isolada"],"O método indireto parte do lucro líquido e faz ajustes."],
+[E,"As obrigações tributárias acessórias consistem em:","Deveres de fazer, como entregar declarações e escriturar documentos fiscais",["O pagamento do tributo","A multa aplicada","Apenas o parcelamento","O desconto de impostos"],"A obrigação principal é pagar o tributo ou a penalidade."],
+ 
+// ---- Simulado 04: Logística, Estoques e Armazenagem
+[P,"No trecho 'A empresa adotou uma medida paliativa', o termo 'paliativa' significa:","Que alivia provisoriamente, sem resolver a causa",["Que resolve definitivamente","Drástica e radical","Que previne qualquer risco","De caráter educativo"],"Paliativo atenua o problema, mas não elimina sua origem."],
+[P,"Leia: 'O inventário periódico é essencial, pois permite confrontar o registro contábil com o saldo físico e corrigir distorções antes que se acumulem.' Segundo o trecho, o inventário serve para:","Comparar registros e saldo físico, corrigindo distorções precocemente",["Substituir os registros contábeis","Eliminar a necessidade de controle","Aumentar o volume de estoque","Reduzir o número de fornecedores"],"A informação está explícita na oração introduzida por 'pois'."],
+[M,"Um triângulo retângulo tem catetos de 9 m e 12 m. A hipotenusa mede:","15 m",["21 m","14 m","18 m","10 m"],"Pitágoras: 9² + 12² = 225, logo 15."],
+[M,"Um reservatório em forma de paralelepípedo mede 5 m × 4 m × 3 m. Sua capacidade é de:","60.000 litros",["12.000 litros","6.000 litros","60 litros","600.000 litros"],"V = 60 m³ e 1 m³ = 1.000 L."],
+[E,"No transporte multimodal, a carga é transportada:","Por mais de um modal, com um único contrato e um único responsável",["Por apenas um modal","Sempre por modais diferentes e contratos distintos","Somente por via aérea","Sem documento de transporte"],"No intermodal, há contratos separados por modal."],
+[E,"Na classificação ABC de estoques, os itens da classe A são:","Poucos itens que concentram a maior parte do valor",["Muitos itens de baixo valor","Itens obsoletos","Itens sem giro","Os de menor importância"],"Exigem controle mais rigoroso."],
+[E,"O estoque de segurança tem por finalidade:","Proteger contra variações na demanda ou no prazo de entrega",["Aumentar o custo do estoque","Eliminar a necessidade de compras","Reduzir o espaço do armazém","Substituir o inventário"],"Evita rupturas em situações imprevistas."],
+[E,"O giro de estoque indica:","Quantas vezes o estoque médio foi renovado em um período",["O valor da depreciação","O custo do frete","A capacidade do armazém","A data de validade"],"Calcula-se dividindo o CMV (ou consumo) pelo estoque médio."],
+[E,"Com consumo de 20 unidades por dia, prazo de reposição de 5 dias e estoque de segurança de 30 unidades, o ponto de reposição é de:","130 unidades",["100 unidades","30 unidades","150 unidades","50 unidades"],"20 × 5 + 30 = 130."],
+[E,"Um bom layout de armazém busca:","Reduzir movimentações e otimizar o fluxo de materiais",["Aumentar as distâncias percorridas","Misturar todos os itens","Eliminar a sinalização","Manter corredores bloqueados"],"Aumenta a produtividade e a segurança."],
+[E,"A unitização de cargas, como o uso de paletes, tem como vantagem:","Facilitar o manuseio e reduzir tempo e avarias",["Aumentar o número de movimentações manuais","Eliminar a necessidade de embalagem","Reduzir a segurança","Impedir o uso de empilhadeiras"],"Agrupa várias unidades em uma só unidade de movimentação."],
+[E,"A logística reversa consiste em:","Retornar produtos, embalagens ou resíduos ao ciclo produtivo ou ao descarte adequado",["Entregar mais rápido ao cliente","Aumentar o estoque","Reduzir a frota","Trocar fornecedores"],"É prática ligada à logística verde e à sustentabilidade."],
+ 
+// ---- Simulado 05: Compras, Licitações, Contratos e Informática
+[P,"Assinale a frase correta quanto à regência verbal:","Os funcionários obedecem às normas de segurança.",["Os funcionários obedecem as normas de segurança.","Os funcionários obedecem com as normas de segurança.","Os funcionários obedecem em as normas de segurança.","Os funcionários obedecem de as normas de segurança."],"'Obedecer' é transitivo indireto e pede a preposição 'a' (a + as = às)."],
+[P,"Assinale a frase correta quanto à concordância nominal:","Anexas ao e-mail, seguem as planilhas.",["Seguem anexo as planilhas.","Elas estavam meias confusas.","Seguem em anexas as planilhas.","As planilhas seguem anexo ao e-mail."],"'Anexo' concorda com o substantivo (anexas)."],
+[M,"As raízes da função f(x) = x² − 6x + 8 são:","2 e 4",["1 e 8","−2 e −4","3 e 5","6 e 8"],"Soma = 6 e produto = 8, logo 2 e 4."],
+[M,"O montante de R$ 5.000 aplicados a juros compostos de 2% ao mês por 2 meses é:","R$ 5.202,00",["R$ 5.200,00","R$ 5.100,00","R$ 5.404,00","R$ 5.020,00"],"5.000 × 1,02² = 5.000 × 1,0404 = 5.202."],
+[E,"A Lei nº 13.303/2016 aplica-se a:","Empresas públicas, sociedades de economia mista e suas subsidiárias",["Apenas a prefeituras","Somente a empresas privadas","Exclusivamente ao Poder Judiciário","Somente a autarquias"],"Dispõe sobre o estatuto jurídico dessas empresas, incluindo licitações e contratos."],
+[E,"Segundo a Lei nº 14.133/2021, são modalidades de licitação:","Pregão, concorrência, concurso, leilão e diálogo competitivo",["Convite e tomada de preços","Apenas pregão","Somente concorrência","Cotação eletrônica e sorteio"],"A nova lei extinguiu o convite e a tomada de preços."],
+[E,"A fiscalização de contratos consiste em:","Acompanhar a execução e verificar o cumprimento das cláusulas e dos prazos",["Escolher o fornecedor","Redigir o edital","Reduzir o preço sem justificativa","Arquivar o contrato sem leitura"],"O fiscal registra ocorrências e atesta a execução."],
+[E,"Quanto aos aditivos contratuais, é correto afirmar que:","São alterações formalizadas por termo aditivo, dentro dos limites legais",["Podem ser verbais e ilimitados","Dispensam justificativa","Substituem a licitação","Só ocorrem após o fim do contrato"],"Como regra, acréscimos e supressões observam o limite de 25%."],
+[E,"No Windows 11, o atalho Windows + Shift + S:","Abre a ferramenta de captura de tela (recorte)",["Bloqueia o computador","Abre as Configurações","Abre o Explorador de Arquivos","Desliga o computador"],"Permite recortar uma área da tela e copiá-la."],
+[E,"No Excel, o símbolo $ em $B$2 indica:","Referência absoluta",["Referência relativa","Referência circular","Intervalo nomeado","Valor em moeda estrangeira"],"A célula não muda ao copiar a fórmula."],
+[E,"Pela LGPD (Lei nº 13.709/2018), o controlador é:","A pessoa a quem competem as decisões sobre o tratamento de dados pessoais",["O titular dos dados","O sistema operacional","A pessoa que apenas armazena arquivos","O órgão que julga processos"],"O operador realiza o tratamento em nome do controlador."],
+[E,"O ciclo de vida de um contrato compreende, em linhas gerais:","Planejamento, formalização, execução e acompanhamento, e encerramento",["Apenas a assinatura","Somente o pagamento","Apenas a licitação","Somente a rescisão"],"A gestão contratual acompanha todas as etapas, e não só a assinatura."]
+]
+},
+{
+  tema:"laranja", cargo:"Profissional Transpetro Nível Médio - Ênfase 1: Administração e Controle", banca:"Cesgranrio", nome:"Questões extensas (estilo Cesgranrio, 5 alternativas)", size:12,
+  titles:["Logística, Transportes, Estoques e Informática", "Compras, Contratos, RH e Finanças"],
+  bank:[
+// ---- Simulado 01: logística, transportes, estoques e informática
+[P,"Leia o texto a seguir.\n\nA logística verde busca reduzir os impactos ambientais das operações de transporte, armazenagem e distribuição. Entre suas práticas estão a otimização de rotas, o uso de embalagens recicláveis e a logística reversa. Embora exija investimentos iniciais, tende a reduzir custos a médio prazo e a melhorar a imagem da empresa.\n\nDe acordo com o texto, a logística verde:","pode reduzir custos a médio prazo, apesar de exigir investimentos iniciais.",["elimina a necessidade de transporte.","dispensa o uso de embalagens.","aumenta necessariamente o impacto ambiental.","é incompatível com a logística reversa."],"A informação está no último período do texto."],
+[P,"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão:","Devem ser priorizados, no planejamento, os itens de maior giro.",["Deve ser priorizados, no planejamento, os itens de maior giro.","Fazem dois anos que o contrato foi renovado.","Houveram atrasos nas entregas do terceiro trimestre.","Existe diversos fornecedores homologados."],"O verbo concorda com o sujeito 'itens'. 'Fazer' (tempo) e 'haver' (existir) são impessoais; 'existir' concorda com 'fornecedores'."],
+[M,"Uma empresa dispõe de 5 fornecedores qualificados e precisa escolher 2 para um contrato. O número de maneiras distintas de fazer essa escolha é:","10",["20","5","25","15"],"A ordem não importa: C(5,2) = 5! ÷ (2! × 3!) = 10."],
+[M,"O valor de um equipamento sofre desvalorização segundo a função V(t) = 80.000 × (0,9)ᵗ, em que t é o tempo em anos. Após 2 anos, o valor do equipamento é de:","R$ 64.800,00",["R$ 72.000,00","R$ 62.000,00","R$ 66.000,00","R$ 58.320,00"],"V(2) = 80.000 × 0,81 = 64.800."],
+[E,"Uma empresa contrata um único operador logístico para transportar uma carga da refinaria ao porto por rodovia e, em seguida, por cabotagem, com um único contrato e um único documento de transporte. Essa operação caracteriza o transporte:","multimodal.",["intermodal, com contrato separado para cada modal.","unimodal rodoviário.","fracionado.","dedicado exclusivamente."],"No multimodal há um único contrato e um único responsável pela carga; no intermodal, os contratos são independentes."],
+[E,"Em um almoxarifado, 20% dos itens respondem por cerca de 80% do valor total movimentado. Segundo a classificação ABC, esses itens pertencem à classe:","A, com controle rigoroso.",["B, com controle intermediário.","C, com controle simplificado.","D, sem controle.","fora da classificação ABC."],"A classe A reúne poucos itens de maior valor e exige maior controle."],
+[E,"Um item tem consumo médio de 40 unidades por dia e prazo de reposição de 6 dias. Com estoque de segurança de 60 unidades, o ponto de reposição é de:","300 unidades.",["240 unidades.","360 unidades.","100 unidades.","180 unidades."],"Ponto de reposição = 40 × 6 + 60 = 300."],
+[E,"No layout de um armazém, posicionar os itens de maior giro mais próximos das áreas de expedição tem como objetivo principal:","reduzir as distâncias percorridas e o tempo de movimentação.",["aumentar o espaço ocioso.","dificultar o acesso aos itens críticos.","elevar o custo de manuseio.","eliminar a necessidade de inventário."],"A otimização do fluxo aumenta a produtividade e reduz custos."],
+[E,"Sobre embalagem e unitização de cargas, é correto afirmar que:","a unitização, com paletes e contêineres, facilita o manuseio e reduz avarias.",["a embalagem serve apenas para fins estéticos.","a unitização aumenta o número de movimentações manuais.","embalagens não influenciam a segurança no transporte.","a unitização impede o uso de empilhadeiras."],"Agrupar unidades em uma só unidade de movimentação ganha tempo e protege a carga."],
+[E,"Em um computador, a unidade central de processamento (CPU) é responsável por:","executar instruções e processar dados.",["armazenar permanentemente os arquivos do usuário.","exibir imagens na tela.","conectar o equipamento à internet.","fornecer energia aos componentes."],"A CPU é o 'cérebro' do computador; o armazenamento permanente é feito por SSD ou HD."],
+[E,"No Windows 11, para copiar um arquivo de uma pasta para outra, o procedimento correto é:","selecionar o arquivo, usar Ctrl + C, abrir a pasta de destino e usar Ctrl + V.",["usar Ctrl + X na pasta de destino.","pressionar Alt + F4 sobre o arquivo.","usar Ctrl + Z na pasta de destino.","usar Windows + L na pasta de origem."],"Ctrl + C copia e Ctrl + V cola; Ctrl + X recorta e Alt + F4 fecha janelas."],
+[E,"Um empregado recebe um e-mail de remetente desconhecido, com um link para 'atualizar a senha corporativa'. Para a segurança da informação, a conduta mais adequada é:","não clicar no link, comunicar o setor de TI e excluir a mensagem.",["clicar no link e informar a senha atual.","encaminhar a mensagem aos colegas.","responder ao remetente com a senha.","clicar no link apenas se o e-mail parecer urgente."],"Trata-se de tentativa de phishing."],
+ 
+// ---- Simulado 02: compras, contratos, RH e finanças
+[P,"Leia o texto a seguir.\n\nA gestão de contratos exige acompanhamento sistemático da execução, pois falhas na fiscalização podem gerar atrasos, sobrepreço e litígios. Por isso, o fiscal deve registrar ocorrências, comunicar irregularidades e verificar se o objeto contratado está sendo entregue conforme as especificações.\n\nSegundo o texto, uma das atribuições do fiscal do contrato é:","registrar ocorrências e verificar se o objeto é entregue conforme as especificações.",["negociar o preço sem registro formal.","dispensar o acompanhamento da execução.","aprovar aditivos sem justificativa.","escolher o fornecedor vencedor."],"As atribuições aparecem no segundo período."],
+[P,"Assinale a alternativa em que o emprego do sinal indicativo de crase está de acordo com a norma-padrão:","O relatório foi encaminhado à diretoria financeira para aprovação.",["As propostas serão analisadas à partir de segunda-feira.","O gerente entregou o contrato à ambas as empresas.","O diretor referiu-se à ele durante a reunião.","O fiscal dirigiu-se à pé até o almoxarifado."],"'À diretoria' = preposição a + artigo a. Não há crase antes de verbo, pronome ou palavras masculinas."],
+[M,"As notas de cinco empregados em um treinamento foram 5, 7, 7, 9 e 12. A média, a moda e a amplitude são, respectivamente:","8, 7 e 7.",["8, 9 e 7.","7, 7 e 8.","8, 7 e 12.","9, 7 e 7."],"Média = 40 ÷ 5 = 8; moda = 7 (mais frequente); amplitude = 12 − 5 = 7."],
+[M,"Um tanque cilíndrico tem raio da base de 2 m e altura de 5 m. Adotando π = 3, seu volume, em m³, é de:","60",["30","20","120","45"],"V = π r² h = 3 × 4 × 5 = 60."],
+[E,"Na Lei nº 14.133/2021, a modalidade de licitação adequada à aquisição de bens e serviços comuns, cujo critério de julgamento seja o menor preço ou o maior desconto, é o:","pregão.",["concurso.","leilão.","diálogo competitivo.","convite."],"O convite foi extinto pela nova lei."],
+[E,"A Lei nº 13.303/2016 estabelece que as licitações das empresas estatais devem observar, entre outros, os princípios da:","igualdade, publicidade, eficiência, economicidade e julgamento objetivo.",["subjetividade, sigilo permanente e pessoalidade.","preferência por amigos e parceiros comerciais.","dispensa de competitividade em todos os casos.","vinculação a decisões verbais e informais."],"Estão previstos, por exemplo, no art. 31 da lei."],
+[E,"Um contrato de prestação de serviços de R$ 1.000.000,00 precisa de acréscimo no objeto. Considerando o limite geral de 25% do valor inicial atualizado, o valor máximo desse acréscimo é de:","R$ 250.000,00",["R$ 100.000,00","R$ 500.000,00","R$ 125.000,00","R$ 750.000,00"],"25% de 1.000.000 = 250.000 (regra geral para alterações unilaterais, Lei 14.133, art. 125)."],
+[E,"A formalização e o acompanhamento de contratos por meio de sistemas eletrônicos de gestão (contratos digitais) têm como vantagem:","maior rastreabilidade, padronização e controle de prazos e aditivos.",["eliminar a necessidade de fiscalização.","impedir qualquer alteração contratual.","dispensar registros e assinaturas.","reduzir a transparência dos atos."],"A integração com sistemas facilita o controle da execução."],
+[E,"O processo em que o desempenho do empregado é avaliado periodicamente com feedback de chefias, pares e subordinados é denominado avaliação:","360 graus.",["unilateral.","apenas por metas financeiras.","por incidentes críticos exclusivamente.","de potencial somente."],"Reúne múltiplas fontes de informação."],
+[E,"Em um sistema de gestão integrado, uma não conformidade identificada em auditoria interna deve gerar:","ação corretiva, com análise de causa e verificação de eficácia.",["punição imediata do setor auditado.","arquivamento sem registro.","correção apenas do sintoma, sem análise de causa.","dispensa do ciclo PDCA."],"A ação corretiva elimina a causa e evita recorrência."],
+[E,"Uma empresa apresenta ativo total de R$ 900.000,00 e passivo exigível de R$ 400.000,00. Pela equação patrimonial, o patrimônio líquido é de:","R$ 500.000,00",["R$ 1.300.000,00","R$ 400.000,00","R$ 360.000,00","R$ 900.000,00"],"Ativo = Passivo + PL, logo PL = 900.000 − 400.000 = 500.000."],
+[E,"Um título de R$ 5.000,00 foi pago 4 meses antes do vencimento, com desconto comercial simples de 1,5% ao mês. O valor do desconto foi de:","R$ 300,00",["R$ 75,00","R$ 4.700,00","R$ 30,00","R$ 375,00"],"D = 5.000 × 0,015 × 4 = 300."]
+]
+},
+{
+  tema:"roxo", cargo:"Técnico de Promoção Social (Prefeitura de Cubatão)", banca:"IBAM", nome:"Simulados (180 questões)", size:10,
+  titles:[
+  "LOAS, CRAS e BPC", "CREAS, PAEFI e ECA", "BPC e Benefícios Eventuais",
+  "LGPD, Ética e SUAS", "PNAS e Territorialização", "Fundamentos do SUAS e LOAS",
+  "Pessoa Idosa e Pessoa com Deficiência", "Alta Complexidade e Acolhimento", "Gestão, Conselhos e Financiamento",
+  "Trabalho Social com Famílias", "Violência e Garantia de Direitos", "Revisão Geral",
+  "CF, Tipificação e Resoluções CNAS", "NOB/SUAS, PNAS e LBI", "Violência, Negligência e Trabalho Infantil",
+  "Acolhida, Escuta e Atividades Socioeducativas", "Convivência e Cuidados Cotidianos", "Primeiros Socorros e Registros"
+],
+  bank:[
+// ---- Simulado 01
+[P,"Assinale a alternativa em que a concordância verbal está correta:","Faltaram recursos financeiros para o programa.",["Fazem dois anos que o SUAS foi criado.","Deve existir novas diretrizes.","Mais de um técnico participaram da reunião."],"O sujeito 'recursos' está no plural. Nas demais: 'Faz dois anos' (fazer indicando tempo é impessoal), 'Devem existir' e 'participou'."],
+[P,"Assinale a palavra escrita INCORRETAMENTE:","impecilho",["empecilho","exceção","beneficência"],"A grafia correta é 'empecilho'."],
+[M,"Um programa social atendeu 200 famílias. Com um acréscimo de 20%, o novo total é:","240 famílias",["220 famílias","250 famílias","260 famílias"],"20% de 200 = 40; 200 + 40 = 240."],
+[M,"O valor da expressão 60 + [30 - (5 × 4)] é:","70",["65","75","80"],"Primeiro parênteses: 5 × 4 = 20; depois colchetes: 30 - 20 = 10; por fim 60 + 10 = 70."],
+[I,"No Windows, o atalho Windows + E abre:","O Explorador de Arquivos",["A janela Executar","A Área de Trabalho","O Gerenciador de Tarefas"],"Windows + R abre o Executar, Windows + D mostra a área de trabalho e Ctrl + Shift + Esc abre o Gerenciador de Tarefas."],
+[I,"No Excel, a fórmula =MEDIA(A1:A10) calcula:","A média aritmética do intervalo",["A mediana do intervalo","A soma dos valores","O valor máximo do intervalo"],"MEDIA calcula a média aritmética. SOMA soma, MED é a mediana e MAXIMO retorna o maior valor."],
+[E,"Segundo o art. 203 da Constituição Federal, a assistência social será prestada a quem dela necessitar:","Independentemente de contribuição à seguridade social",["Mediante contribuição prévia","Apenas a trabalhadores formais","Somente a moradores com imóvel próprio"],"A assistência social é política não contributiva: não exige contribuição prévia."],
+[E,"O PAIF, serviço ofertado no CRAS, tem por finalidade principal:","Prevenir violações de direitos fortalecendo vínculos familiares e comunitários",["Abrigar adultos em alta complexidade","Aplicar medidas socioeducativas judiciais","Fiscalizar tributos municipais"],"O PAIF é o principal serviço da Proteção Social Básica, de caráter preventivo e protetivo."],
+[E,"No BPC, a renda familiar mensal per capita deve ser inferior a:","1/4 do salário mínimo",["1/2 salário mínimo","1 salário mínimo","2 salários mínimos"],"A LOAS (art. 20, § 3º) considera de baixa renda a família com renda per capita inferior a 1/4 do salário mínimo."],
+[E,"O serviço essencial ofertado pelo CREAS (média complexidade) é o:","PAEFI",["PAIF","Serviço de Convivência e Fortalecimento de Vínculos","Programa Bolsa Família"],"O PAEFI atende famílias e indivíduos com direitos violados. O PAIF é do CRAS."],
+ 
+// ---- Simulado 02
+[P,"Assinale a frase em que a crase está corretamente empregada:","Entreguei o relatório à diretora.",["Fui à pé até o CRAS.","Refiro-me à todos os usuários.","O técnico começou à trabalhar cedo."],"'À diretora' = preposição a + artigo a. Não há crase antes de palavra masculina, pronome indefinido plural ou verbo."],
+[P,"Em 'O técnico entregou o relatório à coordenadora', o termo 'à coordenadora' é:","Objeto indireto",["Objeto direto","Sujeito","Adjunto adnominal"],"Complementa o verbo 'entregar' por meio de preposição (a), por isso é objeto indireto."],
+[M,"A razão entre o número de técnicos (15) e o de administrativos (25) é:","3/5",["5/3","2/3","1/2"],"15/25 simplificado por 5 resulta em 3/5."],
+[M,"Se 4 servidores elaboram certa quantidade de relatórios em 2 dias, quanto tempo 3 servidores levam para elaborar a mesma quantidade?","2 dias e 16 horas (≈ 2,67 dias)",["2 dias","3 dias","4 dias"],"Grandezas inversamente proporcionais: 4 × 2 = 3 × x, logo x = 8/3 ≈ 2,67 dias."],
+[I,"O malware que se disfarça de programa legítimo para abrir brechas de segurança é o:","Cavalo de Troia (Trojan)",["Worm","Firewall","Cookie"],"O Trojan parece útil, mas esconde código malicioso. O worm se propaga sozinho e o firewall é defesa."],
+[I,"O protocolo de navegação que usa criptografia SSL/TLS é o:","HTTPS",["HTTP","FTP","SMTP"],"HTTPS é a versão segura do HTTP. FTP transfere arquivos e SMTP envia e-mails."],
+[E,"Pelo ECA, o princípio da prioridade absoluta assegura:","Precedência de atendimento, primazia na proteção e destinação privilegiada de recursos públicos",["Isenção de responsabilidade por atos infracionais","Direito ao voto obrigatório aos 12 anos","Tratamento igual sem distinção de idade"],"Está no art. 4º do ECA: crianças e adolescentes têm prioridade absoluta na efetivação de seus direitos."],
+[E,"Segundo o ECA, o Conselho Tutelar é um órgão:","Permanente, autônomo e não jurisdicional, que zela pelos direitos da criança e do adolescente",["Do Poder Judiciário, que aplica medidas socioeducativas","Temporário, vinculado ao Ministério Público","Privado, mantido por doações"],"Art. 131 do ECA. Não julga: aplica medidas protetivas e encaminha casos."],
+[E,"Para o ECA, é considerada criança a pessoa de até:","12 anos incompletos",["10 anos completos","14 anos","16 anos"],"Criança: até 12 anos incompletos. Adolescente: de 12 a 18 anos."],
+[E,"Diante de violência ou negligência contra criança ou idoso, o técnico deve:","Acionar a rede de proteção e os órgãos competentes (Conselho Tutelar, CREAS etc.)",["Omitir para preservar a privacidade da família","Resolver de forma privada, sem registro","Aguardar o agravamento da situação"],"Há dever legal e ético de notificar e proteger. A omissão pode configurar infração ética e legal."],
+ 
+// ---- Simulado 03
+[P,"Complete: 'Não sei ___ o benefício foi negado.'","por que",["porque","porquê","por quê, sem exceção"],"Em interrogativa indireta no meio da frase, usa-se 'por que' (separado e sem acento)."],
+[P,"Assinale a reescrita que ALTERA o sentido de 'O benefício foi concedido porque preenchia os requisitos.':","O benefício foi concedido, contudo preenchia os requisitos.",["O benefício foi concedido já que preenchia os requisitos.","O benefício foi concedido visto que preenchia os requisitos.","O benefício foi concedido pois preenchia os requisitos."],"'Contudo' indica oposição. As demais conjunções indicam causa, como o 'porque' original."],
+[M,"A área de uma sala quadrada de 8 metros de lado é:","64 m²",["32 m²","16 m²","48 m²"],"Área do quadrado = lado × lado = 8 × 8 = 64 m²."],
+[M,"A média aritmética das notas 7, 8, 9 e 10 é:","8,5",["8","9","9,5"],"Soma = 34; 34 ÷ 4 = 8,5."],
+[I,"No Word, a guia que reúne verificação ortográfica e controle de alterações é:","Revisão",["Página Inicial","Inserir","Exibição"],"A guia Revisão traz ortografia, comentários e controle de alterações."],
+[I,"A cópia de segurança de dados é conhecida como:","Backup",["Cache","Spam","Phishing"],"Backup é a cópia preventiva de dados. Cache é memória temporária e phishing é fraude eletrônica."],
+[E,"Os benefícios eventuais da assistência social atendem necessidades decorrentes de:","Nascimento, morte, vulnerabilidade temporária e calamidade pública",["Investimentos empresariais","Campanhas eleitorais","Compra de veículos particulares"],"Previstos no art. 22 da LOAS, são provisões suplementares e provisórias."],
+[E,"O BPC consiste em:","Um salário mínimo mensal ao idoso (65 anos ou mais) e à pessoa com deficiência de baixa renda",["Aposentadoria rural gerida por sindicatos","Auxílio funeral pago pelo município","Bolsa de estudos federal"],"É benefício não contributivo, previsto na Constituição e na LOAS (art. 20)."],
+[E,"O Cadastro Único (CadÚnico) é:","Instrumento de identificação e caracterização socioeconômica das famílias de baixa renda",["Sistema exclusivo de aposentadorias do INSS","Cadastro de eleitores","Registro de imóveis municipais"],"É a porta de entrada para diversos programas sociais, como o Bolsa Família e outros."],
+[E,"O BPC integra, no SUAS, a:","Proteção Social Básica",["Proteção Social Especial de Alta Complexidade","Previdência Social contributiva","Saúde suplementar"],"O BPC é benefício da assistência social e compõe a proteção social básica."],
+ 
+// ---- Simulado 04
+[P,"Assinale a frase correta quanto à concordância:","A técnica estava meio preocupada com o caso.",["A técnica estava meia preocupada com o caso.","Seguem anexo as fichas cadastrais.","Eles mesmo atenderam as famílias."],"'Meio' (= um pouco) é advérbio e não varia. 'Anexo' concorda com o substantivo (anexas) e 'mesmo' também (mesmos)."],
+[P,"Assinale a palavra escrita corretamente:","exceção",["excessão","exessão","esceção"],"'Exceção' vem de 'excetuar'; escreve-se com 'xc' e 'ç'."],
+[M,"O valor de x na equação 5x - 10 = 2x + 20 é:","10",["5","15","20"],"5x - 2x = 20 + 10, logo 3x = 30 e x = 10."],
+[M,"Um servidor recebe R$ 2.000,00 e sofre desconto de 11%. O valor líquido é:","R$ 1.780,00",["R$ 1.890,00","R$ 1.800,00","R$ 1.680,00"],"11% de 2.000 = 220; 2.000 - 220 = 1.780."],
+[I,"A fraude eletrônica que usa mensagens falsas para obter dados sensíveis do usuário é o:","Phishing",["Backup","Firewall","Cookie"],"Phishing induz a vítima a fornecer senhas e dados pessoais."],
+[I,"No Windows, o atalho Ctrl + C serve para:","Copiar",["Colar","Recortar","Desfazer"],"Ctrl + V cola, Ctrl + X recorta e Ctrl + Z desfaz."],
+[E,"A LGPD, aplicada ao atendimento socioassistencial, exige:","Sigilo profissional e proteção e segurança dos dados pessoais e sensíveis dos usuários",["Divulgação de prontuários em murais","Destruição de fichas no mesmo dia","Compartilhamento de dados com redes sociais"],"Dados de usuários são sensíveis e devem ter acesso controlado e armazenamento seguro."],
+[E,"São exemplos de dados pessoais sensíveis segundo a LGPD:","Origem racial ou étnica, convicção religiosa e dado referente à saúde",["Apenas nome e endereço comercial","Somente informações de empresas","Dados publicados em diários oficiais"],"O art. 5º da LGPD lista dados sensíveis, que exigem proteção reforçada."],
+[E,"No SUAS, a diretriz da matricialidade sociofamiliar significa que:","A família é o núcleo central de referência para planejar e executar as ações",["O atendimento é individual e isolado da comunidade","O Estado assume a tutela definitiva dos menores","As decisões técnicas dispensam os usuários"],"A família é o centro da atenção protetiva, em seu contexto comunitário."],
+[E,"CRAS e CREAS são, respectivamente, unidades de:","Proteção Social Básica e Proteção Social Especial de Média Complexidade",["Proteção Social Especial e Proteção Social Básica","Alta Complexidade e Proteção Básica","Previdência e Saúde"],"O CRAS previne e fortalece vínculos; o CREAS atende violações de direitos."],
+ 
+// ---- Simulado 05
+[P,"Assinale a frase com regência verbal correta:","Os servidores aspiram a uma promoção.",["Os servidores aspiram uma promoção.","Os usuários chegaram no CRAS cedo.","O técnico obedeceu as normas."],"'Aspirar' (= almejar), 'chegar' e 'obedecer' pedem a preposição 'a'."],
+[P,"Em 'capilarizar a proteção social', o verbo 'capilarizar' significa:","Fazer a proteção chegar a todos os territórios, como ramificações",["Reduzir a oferta de serviços","Centralizar o atendimento","Cobrar taxas dos usuários"],"Vem de 'capilar': ramificar-se, alcançar todas as áreas do território."],
+[M,"Se 3 técnicos atendem 45 famílias, quantas famílias 5 técnicos atendem no mesmo ritmo?","75",["60","65","90"],"Cada técnico atende 15 famílias; 5 × 15 = 75."],
+[M,"Um técnico atende 6 famílias por dia. Em 22 dias úteis, atende:","132 famílias",["120 famílias","128 famílias","144 famílias"],"6 × 22 = 132."],
+[I,"No Excel, a fórmula =SOMA(A1:A5) calcula:","A soma dos valores do intervalo",["A média dos valores","O maior valor","A quantidade de células"],"SOMA adiciona todos os valores de A1 a A5."],
+[I,"É exemplo de dispositivo de ENTRADA de dados:","Teclado",["Monitor","Impressora","Caixa de som"],"Monitor, impressora e caixa de som são dispositivos de saída."],
+[E,"A PNAS/2004 divide a proteção social em:","Proteção Social Básica e Proteção Social Especial (média e alta complexidade)",["Federal, Estadual e Municipal","Contributiva e não contributiva privada","Emergencial e temporária"],"Essa é a organização oficial dos serviços no SUAS."],
+[E,"A territorialização no SUAS tem como finalidade:","Reconhecer dinâmicas, vulnerabilidades e potencialidades do território para aproximar os serviços da realidade local",["Arrecadar impostos prediais","Restringir o acesso a quem nasceu no município","Eliminar unidades descentralizadas"],"O território é base para organizar e planejar a oferta de serviços."],
+[E,"A Vigilância Socioassistencial tem a função de:","Produzir informações sobre vulnerabilidades e riscos nos territórios e sobre a oferta de serviços",["Fiscalizar o pagamento de tributos","Julgar processos de guarda","Substituir os CRAS e CREAS"],"Subsidia o planejamento e a gestão do SUAS com dados do território."],
+[E,"Segundo o art. 203 da CF/88, um dos objetivos da assistência social é:","A proteção à família, à maternidade, à infância, à adolescência e à velhice",["A cobrança de taxas alfandegárias","A fiscalização do sistema financeiro","A emissão de moeda"],"Art. 203, I, da Constituição Federal."],
+ 
+// ---- Simulado 06
+[P,"Assinale a frase com pontuação correta:","Os técnicos, que chegaram cedo, iniciaram o atendimento.",["Os técnicos que, chegaram cedo iniciaram o atendimento.","Os técnicos, que chegaram cedo iniciaram, o atendimento.","Os técnicos que chegaram, cedo, iniciaram o atendimento."],"A oração explicativa 'que chegaram cedo' fica entre vírgulas."],
+[P,"O plural de 'cidadão' é:","cidadãos",["cidadões","cidadães","cidadãs"],"Cidadão faz plural em -ãos."],
+[M,"30% de 150 é:","45",["30","50","55"],"0,30 × 150 = 45."],
+[M,"Um valor de R$ 80 passou para R$ 100. O aumento percentual foi de:","25%",["20%","15%","30%"],"Aumento de 20 sobre a base de 80: 20/80 = 25%."],
+[I,"O atalho Ctrl + Z serve para:","Desfazer a última ação",["Copiar","Salvar","Imprimir"],"Ctrl + S salva e Ctrl + P imprime."],
+[I,"A extensão padrão de um arquivo do Word atual é:",".docx",[".xlsx",".pptx",".mp3"],".xlsx é do Excel e .pptx do PowerPoint."],
+[E,"A LOAS é a lei de número:","8.742/1993",["8.069/1990","13.709/2018","13.146/2015"],"8.069 é o ECA, 13.709 a LGPD e 13.146 a LBI."],
+[E,"O SUAS é um sistema:","Público, não contributivo, descentralizado e participativo",["Privado e contributivo","Exclusivo da União","Restrito a idosos"],"Organiza a assistência social em todo o país, com gestão compartilhada."],
+[E,"O comando único das ações da assistência social em cada esfera de governo cabe a:","Um único órgão gestor da política",["Poder Judiciário","Ministério Público","Conselho Tutelar"],"É diretriz da LOAS para dar unidade à gestão."],
+[E,"Segundo a LOAS, a primazia na condução da política em cada esfera de governo é:","Do Estado",["Das entidades privadas","Das igrejas","Do mercado"],"A LOAS prevê a primazia da responsabilidade do Estado."],
+ 
+// ---- Simulado 07
+[P,"Assinale a palavra com acentuação correta:","ideia",["idéia","assembléia","jóia"],"Paroxítonas com ditongo aberto 'ei/oi' perderam o acento no Acordo Ortográfico."],
+[P,"Assinale a frase correta:","O mau atendimento causou mal-estar.",["O mal atendimento causou mau-estar.","O mau atendimento causou mau-estar.","O mal atendimento causou mal-estar."],"'Mau' é adjetivo (oposto de bom); 'mal-estar' usa 'mal'."],
+[M,"Em um grupo de 40 pessoas, 25% são idosas. Quantas são idosas?","10",["8","12","15"],"25% de 40 = 10."],
+[M,"Se 2/5 de um número valem 60, o número é:","150",["120","100","24"],"60 ÷ 2 × 5 = 150."],
+[I,"O atalho Ctrl + S serve para:","Salvar",["Abrir","Imprimir","Selecionar tudo"],"Ctrl + A seleciona tudo e Ctrl + P imprime."],
+[I,"Em planilhas, o endereço de uma célula é formado por:","Letra da coluna e número da linha (ex.: B3)",["Número da coluna e letra da linha","Apenas números","Nome do arquivo"],"Ex.: B3 é a coluna B, linha 3."],
+[E,"O Estatuto da Pessoa Idosa considera idosa a pessoa com idade igual ou superior a:","60 anos",["55 anos","65 anos","70 anos"],"No BPC a idade exigida é 65, mas o Estatuto adota 60."],
+[E,"A Lei Brasileira de Inclusão (Lei 13.146/2015) é também chamada de:","Estatuto da Pessoa com Deficiência",["Estatuto da Cidade","Estatuto do Desarmamento","Código de Defesa do Consumidor"],"Destina-se a assegurar direitos e liberdades da pessoa com deficiência."],
+[E,"É dever de assegurar com absoluta prioridade os direitos da pessoa idosa:","Da família, da comunidade, da sociedade e do Poder Público",["Somente da família","Somente do Estado","Somente de instituições privadas"],"A responsabilidade é compartilhada (Estatuto da Pessoa Idosa)."],
+[E,"É serviço da Proteção Social Básica voltado a idosos e pessoas com deficiência:","Serviço de Proteção Social Básica no Domicílio",["Serviço de Acolhimento em República","Liberdade Assistida","Acolhimento em Família Acolhedora"],"Os demais são da Proteção Especial ou do sistema socioeducativo."],
+ 
+// ---- Simulado 08
+[P,"Assinale a frase na voz passiva:","O relatório foi elaborado pela equipe.",["A equipe elaborou o relatório.","O técnico chegou cedo.","Os usuários esperavam atendimento."],"O sujeito sofre a ação (verbo auxiliar + particípio + agente da passiva)."],
+[P,"Em 'Eles intervieram no caso', o verbo 'intervir' está no:","Pretérito perfeito do indicativo",["Pretérito imperfeito","Futuro do presente","Presente do subjuntivo"],"Intervir conjuga-se como vir: eles intervieram."],
+[M,"Um abrigo tem 24 vagas e 75% estão ocupadas. Vagas ocupadas:","18",["16","20","6"],"0,75 × 24 = 18."],
+[M,"Uma sala retangular mede 5 m por 4 m. Seu perímetro é:","18 m",["20 m","9 m","36 m"],"2 × (5 + 4) = 18 m."],
+[I,"A Lixeira do Windows serve para:","Guardar temporariamente arquivos excluídos",["Bloquear vírus","Compactar arquivos","Acessar a internet"],"Permite restaurar arquivos apagados, até esvaziá-la."],
+[I,"Para enviar e-mail com cópia oculta, usa-se o campo:","CCO",["Para","Assunto","Anexo"],"Os destinatários em CCO não aparecem para os demais."],
+[E,"O Serviço de Acolhimento Institucional integra a Proteção Social:","Especial de Alta Complexidade",["Básica","Especial de Média Complexidade","Previdenciária"],"Garante moradia e proteção a quem teve vínculos rompidos ou ameaçados."],
+[E,"Segundo o ECA, o acolhimento institucional é medida:","Excepcional e provisória",["Preferencial e por tempo indeterminado","Primeira opção em casos de pobreza","Definitiva, com perda imediata do poder familiar"],"Deve visar à reintegração familiar ou à colocação em família substituta."],
+[E,"Segundo o ECA, a falta ou carência de recursos materiais:","Não é motivo suficiente para perda ou suspensão do poder familiar",["É motivo automático de perda do poder familiar","Autoriza o acolhimento definitivo","Autoriza adoção sem consentimento"],"Nesses casos, a família deve ser incluída em programas de apoio (art. 23)."],
+[E,"Medidas socioeducativas em meio aberto (LA e PSC) são acompanhadas no:","CREAS",["CRAS","Conselho Tutelar","Cadastro Único"],"O CREAS oferece o serviço de MSE em meio aberto."],
+ 
+// ---- Simulado 09
+[P,"Assinale a palavra escrita INCORRETAMENTE:","pesquiza",["pesquisa","análise","extensão"],"Escreve-se 'pesquisa', com s."],
+[P,"Em 'Houve falhas no processo', o verbo 'haver' é:","Impessoal, ficando no singular",["Pessoal, concorda com 'falhas'","Auxiliar, no plural","Transitivo indireto"],"Haver no sentido de existir não tem sujeito: 'Houve falhas'."],
+[M,"Um orçamento de R$ 12.000 dividido igualmente entre 8 CRAS dá a cada um:","R$ 1.500",["R$ 1.200","R$ 1.600","R$ 1.250"],"12.000 ÷ 8 = 1.500."],
+[M,"A fração equivalente a 0,75 é:","3/4",["2/3","4/5","7/5"],"0,75 = 75/100 = 3/4."],
+[I,"É um navegador de internet:","Google Chrome",["Excel","Windows","Word"],"Os demais são planilha, sistema operacional e editor de texto."],
+[I,"Em planilhas, toda fórmula começa com o símbolo:","=",["#","@","&"],"O sinal de igual indica que a célula contém uma fórmula."],
+[E,"O CNAS é:","Instância deliberativa do SUAS, de caráter permanente e composição paritária",["Órgão do Poder Judiciário","Entidade privada com fins lucrativos","Órgão apenas consultivo, sem sociedade civil"],"Reúne representantes do governo e da sociedade civil em igual número."],
+[E,"Os recursos da assistência social são geridos por meio do:","Fundo de Assistência Social",["Fundo Partidário","FGTS","Fundo de pensão privado"],"Cada esfera de governo tem seu fundo, acompanhado pelo conselho."],
+[E,"Os Conselhos de Assistência Social têm composição:","Paritária entre governo e sociedade civil",["Exclusivamente governamental","Exclusivamente empresarial","Somente de membros do Judiciário"],"Garantem o controle social da política."],
+[E,"A NOB/SUAS tem por objetivo:","Disciplinar a gestão da política e a operacionalização do SUAS",["Regular o sistema tributário","Definir regras eleitorais","Regular a previdência privada"],"Estabelece competências, pactuação e financiamento do SUAS."],
+ 
+// ---- Simulado 10
+[P,"Assinale a frase em que 'aonde/onde' está correto:","Aonde os usuários foram após o atendimento?",["Aonde os usuários moram?","Onde os usuários foram após o atendimento?","Aonde fica o CRAS?"],"'Aonde' com verbos de movimento; 'onde' para lugar fixo."],
+[P,"Em 'Ele é um técnico competente e dedicado', 'competente' e 'dedicado' são:","Adjetivos",["Advérbios","Substantivos","Verbos"],"Caracterizam o substantivo 'técnico'."],
+[M,"Um grupo tem 36 usuários e 1/3 faltou. Compareceram:","24",["12","30","18"],"1/3 de 36 = 12; 36 - 12 = 24."],
+[M,"15% de 400 é:","60",["45","50","75"],"0,15 × 400 = 60."],
+[I,"Um 'link' é:","Um endereço que leva a outra página ou recurso",["Um tipo de vírus","Uma impressora","A memória do computador"],"Também chamado de hiperlink."],
+[I,"A sigla PDF significa:","Portable Document Format",["Personal Data File","Print Document Form","Public Digital Folder"],"Formato portátil de documento."],
+[E,"O Serviço de Convivência e Fortalecimento de Vínculos (SCFV) pertence à Proteção Social:","Básica",["Especial de Média Complexidade","Especial de Alta Complexidade","Previdenciária"],"É ofertado no CRAS ou em unidades referenciadas a ele."],
+[E,"O Programa Bolsa Família é:","Programa federal de transferência de renda com condicionalidades em saúde e educação",["Benefício contributivo do INSS","Auxílio funeral municipal","Aposentadoria rural"],"A inscrição é feita pelo Cadastro Único."],
+[E,"O acompanhamento familiar do PAIF caracteriza-se por:","Intervenções continuadas com a família, com objetivos definidos para superar vulnerabilidades",["Atendimento pontual e sem registro","Plantão judicial","Apenas distribuição de cestas básicas"],"É um processo planejado, não uma ação isolada."],
+[E,"A porta de entrada preferencial dos usuários na Proteção Social Básica é o:","CRAS",["CREAS","Fórum","Conselho Tutelar"],"O CRAS é a unidade pública de referência da proteção básica no território."],
+ 
+// ---- Simulado 11
+[P,"Assinale a frase sem erro de concordância:","Havia dois técnicos no plantão.",["Haviam dois técnicos no plantão.","Fazem dois anos que o serviço funciona.","Existe muitos casos pendentes."],"'Haver' (existir) é impessoal; 'existir' concorda com 'casos'; 'fazer' (tempo) é impessoal."],
+[P,"Assinale a frase em que 'mas/mais' está correto:","Atendi muitas famílias, mas não visitei todas.",["Atendi muitas famílias, mais não visitei todas.","Preciso de mas tempo.","Quero mas um relatório."],"'Mas' = oposição (porém); 'mais' = quantidade."],
+[M,"Uma equipe faz 3 visitas por dia, 5 dias por semana, durante 4 semanas. O total é:","60 visitas",["12 visitas","20 visitas","48 visitas"],"3 × 5 × 4 = 60."],
+[M,"Se 1 kg de alimento custa R$ 8, 3,5 kg custam:","R$ 28",["R$ 24","R$ 30","R$ 32"],"8 × 3,5 = 28."],
+[I,"O programa que protege o computador contra vírus é o:","Antivírus",["Navegador","Planilha","Editor de texto"],"Detecta e remove ameaças."],
+[I,"Uma senha segura deve:","Combinar letras, números e símbolos e não ser compartilhada",["Usar a data de nascimento","Ser igual em todos os sites","Ficar anotada em local visível"],"Senhas fracas ou repetidas facilitam invasões."],
+[E,"A Lei Maria da Penha (Lei 11.340/2006) trata de:","Coibir a violência doméstica e familiar contra a mulher",["Adoção de crianças","Previdência rural","Crimes ambientais"],"Cria mecanismos de prevenção e proteção."],
+[E,"A comunicação ao Conselho Tutelar de suspeita de maus-tratos contra criança é:","Obrigatória",["Facultativa, a critério da família","Proibida sem autorização judicial","Necessária só após perícia"],"O ECA (art. 13) exige comunicação obrigatória, inclusive na suspeita."],
+[E,"O Sistema de Garantia de Direitos (SGD) articula:","Estado, família e sociedade, em ações de promoção, defesa e controle",["Apenas o Judiciário","Apenas a polícia","Apenas escolas privadas"],"É uma rede, não um único órgão."],
+[E,"É proibido qualquer trabalho a menores de 16 anos, salvo como aprendiz a partir de:","14 anos",["12 anos","10 anos","16 anos"],"Art. 7º, XXXIII, da Constituição Federal."],
+ 
+// ---- Simulado 12
+[P,"A linguagem de um relatório técnico deve ser:","Clara, objetiva e impessoal",["Cheia de gírias e subjetiva","Exclusivamente poética","Ambígua e informal"],"A clareza evita erros de interpretação."],
+[P,"'Sigilo' é sinônimo de:","Segredo",["Divulgação","Pressa","Dívida"],"Sigilo é o dever de manter reservadas as informações."],
+[M,"Numa fila com 120 pessoas, 40% são prioritárias. Quantas?","48",["40","60","52"],"0,40 × 120 = 48."],
+[M,"A soma dos ângulos internos de um triângulo é:","180°",["90°","270°","360°"],"Vale para qualquer triângulo."],
+[I,"No PowerPoint, a tecla F5 serve para:","Iniciar a apresentação de slides",["Salvar","Imprimir","Fechar o programa"],"Inicia desde o primeiro slide."],
+[I,"É dispositivo de SAÍDA de dados:","Impressora",["Teclado","Mouse","Scanner"],"As outras são de entrada."],
+[E,"Segundo a LOAS, a assistência social é:","Direito do cidadão e dever do Estado",["Favor do governante","Caridade privada","Benefício contributivo"],"Está no art. 1º: política de seguridade social não contributiva."],
+[E,"A Proteção Social Básica destina-se a:","Prevenir situações de risco, desenvolvendo potencialidades e fortalecendo vínculos",["Abrigar adultos em risco","Executar medidas judiciais","Emitir documentos de identidade"],"Atua com famílias em vulnerabilidade, sem violação de direitos."],
+[E,"A escuta qualificada pressupõe:","Postura ética, respeitosa e sem julgamentos morais",["Julgamento moral dos relatos","Pressa para cumprir metas","Exposição pública dos relatos"],"É base do acolhimento e da garantia de direitos."],
+[E,"O trabalho em rede e a articulação intersetorial buscam:","Integrar políticas públicas para garantir direitos",["Isolar serviços","Centralizar tudo no Judiciário","Extinguir equipes multiprofissionais"],"Saúde, educação, habitação e assistência atuam de forma articulada."],
+ 
+// ---- Simulado 13
+[P,"Em 'O técnico visitou a família; ele constatou negligência', o pronome 'ele' é um recurso de:","Coesão referencial, pois retoma 'o técnico'",["Coesão sequencial por conjunção","Elipse do sujeito","Mudança de tema"],"Pronomes que retomam termos anteriores garantem a referenciação."],
+[P,"Em 'Ele tem um coração de pedra', há:","Sentido conotativo (figurado)",["Sentido denotativo (literal)","Erro de concordância","Ambiguidade sintática"],"'Coração de pedra' indica frieza, não um órgão de pedra."],
+[M,"O MMC entre 12 e 18 é:","36",["6","72","24"],"12 = 2²·3 e 18 = 2·3²; MMC = 2²·3² = 36."],
+[M,"O MDC entre 12 e 18 é:","6",["36","3","2"],"Fatores comuns de menor expoente: 2·3 = 6."],
+[I,"No Windows 11, o atalho Windows + I abre:","Configurações",["Pesquisa","Explorador de Arquivos","Bloqueio de tela"],"Windows + E abre o Explorador e Windows + L bloqueia a tela."],
+[I,"No Windows, o atalho Windows + L:","Bloqueia o computador",["Abre as Configurações","Abre a Lixeira","Desliga o computador"],"Útil para proteger a sessão ao se ausentar."],
+[E,"O art. 227 da CF atribui à família, à sociedade e ao Estado o dever de assegurar à criança, com absoluta prioridade:","Seus direitos fundamentais",["Somente a educação privada","Apenas a alimentação","A guarda definitiva"],"É a base da doutrina da proteção integral."],
+[E,"O art. 204 da CF estabelece como diretriz da assistência social:","Descentralização político-administrativa e participação da população",["Centralização total na União","Gestão exclusivamente privada","Contribuição obrigatória dos usuários"],"Também prevê a primazia do Estado na condução da política."],
+[E,"O art. 6º da CF inclui entre os direitos sociais:","A assistência aos desamparados",["O porte de armas","O voto obrigatório","A isenção de todos os impostos"],"Entre eles: educação, saúde, alimentação, trabalho, moradia, transporte e lazer."],
+[E,"A Resolução CNAS nº 109/2009 aprova:","A Tipificação Nacional dos Serviços Socioassistenciais",["A NOB/SUAS 2012","O Estatuto da Criança","A LGPD"],"Descreve e padroniza os serviços da proteção básica e especial."],
+ 
+// ---- Simulado 14
+[P,"Assinale a colocação pronominal correta, segundo a norma culta:","Ninguém me avisou do prazo.",["Ninguém avisou-me do prazo.","Me entregue o relatório, por favor.","Quando entregou-me o relatório, saiu."],"Palavra negativa e conjunção subordinativa atraem o pronome (próclise); não se inicia frase com pronome oblíquo."],
+[P,"A grafia correta é:","antissocial",["anti-social","antisocial","anti social"],"Prefixo terminado em vogal + palavra iniciada por 's': sem hífen e com 's' duplicado."],
+[M,"Os catetos de um triângulo retângulo medem 6 cm e 8 cm. A hipotenusa mede:","10 cm",["14 cm","12 cm","9 cm"],"Pitágoras: 6² + 8² = 100, logo a hipotenusa é 10."],
+[M,"Qual dos números a seguir é primo?","13",["9","15","21"],"13 só é divisível por 1 e por ele mesmo."],
+[I,"Para selecionar vários arquivos NÃO consecutivos no Explorador de Arquivos, mantém-se pressionada a tecla:","Ctrl",["Shift","Alt","Tab"],"Shift seleciona um intervalo contínuo."],
+[I,"A extensão típica de um arquivo compactado é:",".zip",[".exe",".txt",".jpg"],"A compactação reduz o tamanho e reúne arquivos em um só."],
+[E,"A Resolução CNAS nº 33/2012 aprova:","A NOB/SUAS 2012",["A Tipificação dos Serviços","O ECA","A Lei Maria da Penha"],"A NOB/SUAS disciplina a gestão e a operacionalização do SUAS."],
+[E,"Segundo a PNAS/2004, são funções da assistência social:","Proteção social, vigilância socioassistencial e defesa de direitos",["Arrecadação, fiscalização e julgamento","Ensino, pesquisa e extensão","Policiamento, defesa e segurança"],"São as três funções da política de assistência social."],
+[E,"A LBI define como pessoa com deficiência aquela com impedimento de longo prazo de natureza:","Física, mental, intelectual ou sensorial",["Somente física","Apenas temporária","Exclusivamente financeira"],"Art. 2º da Lei 13.146/2015, em interação com barreiras sociais."],
+[E,"Para a LBI, discriminação é:","Qualquer distinção, restrição ou exclusão que impeça o exercício de direitos da pessoa com deficiência",["Somente atos violentos","Apenas atos do Estado","Só o que ocorre no trabalho"],"Inclui a recusa de adaptações razoáveis."],
+ 
+// ---- Simulado 15
+[P,"Assinale a frase correta quanto à regência nominal:","Ela é favorável às mudanças.",["Ela é favorável das mudanças.","Ela é favorável com as mudanças.","Ela é favorável em mudanças."],"'Favorável' rege a preposição 'a'."],
+[P,"Em 'Chegou cedo, mas não foi atendido', a oração 'mas não foi atendido' é:","Coordenada sindética adversativa",["Subordinada adverbial causal","Coordenada aditiva","Subordinada substantiva"],"'Mas' liga orações independentes e indica oposição."],
+[M,"Em um grupo de 5 pessoas, as notas são 3, 7, 5, 9 e 1. A mediana é:","5",["7","3","5,5"],"Em ordem: 1, 3, 5, 7, 9; o valor central é 5."],
+[M,"Um aluno tirou 6 (peso 2) e 8 (peso 3). A média ponderada é:","7,2",["7,0","7,5","6,8"],"(6×2 + 8×3) ÷ 5 = 36 ÷ 5 = 7,2."],
+[I,"Cabeçalho e rodapé do Word servem para:","Repetir informações (título, numeração) em todas as páginas",["Corrigir a ortografia","Inserir gráficos automaticamente","Proteger o arquivo com senha"],"São áreas nas margens superior e inferior da página."],
+[I,"Para inserir a numeração de páginas no Word, usa-se a guia:","Inserir",["Revisão","Exibição","Página Inicial, apenas"],"Na guia Inserir há o grupo Cabeçalho e Rodapé, com Número de Página."],
+[E,"O trabalho infantil caracteriza-se por:","Atividade de trabalho realizada por criança ou adolescente abaixo da idade mínima permitida",["Qualquer brincadeira em família","Participação em oficina de arte","Atividade de lazer"],"No Brasil, a idade mínima é 16 anos (14 como aprendiz)."],
+[E,"Diante de suspeita de exploração sexual de criança ou adolescente, deve-se:","Denunciar (ex.: Disque 100) e encaminhar à rede de proteção",["Tratar como assunto privado da família","Ignorar se a família consentir","Esperar a vítima pedir ajuda"],"Há dever de comunicação e de proteção integral."],
+[E,"A negligência caracteriza-se por:","Omissão de cuidados básicos necessários ao desenvolvimento",["Agressão física intencional","Excesso de atividades culturais","Apoio da comunidade"],"Inclui falta de alimentação, higiene, saúde e proteção."],
+[E,"O Disque 100 recebe denúncias de:","Violações de direitos humanos, como violência contra crianças, idosos e pessoas com deficiência",["Falta de energia elétrica","Multas de trânsito","Reclamações de consumo"],"É um canal gratuito do governo federal."],
+ 
+// ---- Simulado 16
+[P,"Em 'Se o técnico soubesse, agiria antes', os verbos estão, respectivamente, em:","Pretérito imperfeito do subjuntivo e futuro do pretérito",["Pretérito perfeito e futuro do presente","Presente do subjuntivo e presente do indicativo","Imperativo e infinitivo"],"'Soubesse' (subjuntivo) expressa hipótese; 'agiria' é a consequência."],
+[P,"Assinale a frase com vírgula correta:","Na reunião de ontem, o coordenador explicou as regras.",["O coordenador, explicou as regras.","Na reunião de ontem o coordenador, explicou as regras.","O coordenador explicou, as regras."],"Adjunto adverbial deslocado vem seguido de vírgula; não se separa sujeito de verbo nem verbo de objeto."],
+[M,"Um tanque tem forma de paralelepípedo com 4 m de comprimento, 3 m de largura e 2 m de altura. Seu volume é:","24 m³",["9 m³","12 m³","48 m³"],"V = 4 × 3 × 2 = 24."],
+[M,"2,5 litros equivalem a:","2.500 mL",["250 mL","25 mL","25.000 mL"],"1 L = 1.000 mL."],
+[I,"A fórmula =SE(A1>=7;'Aprovado';'Reprovado') retorna 'Aprovado' quando:","A1 for maior ou igual a 7",["A1 for menor que 7","A1 estiver vazia","A1 for igual a 0"],"SE(teste; valor_se_verdadeiro; valor_se_falso)."],
+[I,"No Excel, a referência $A$1 é:","Absoluta",["Relativa","Mista","Circular"],"Não muda ao copiar a fórmula para outras células."],
+[E,"Na comunicação não violenta, os componentes são:","Observação, sentimento, necessidade e pedido",["Ordem, crítica, ameaça e castigo","Julgamento, rótulo, culpa e punição","Silêncio, ironia, pressa e fuga"],"Proposta de Marshall Rosenberg para um diálogo empático."],
+[E,"Ao acolher um usuário, o profissional deve:","Recebê-lo com respeito, escutar suas demandas e orientar os encaminhamentos",["Interromper o relato para apressar","Julgar o relato","Transferir o caso sem ouvir"],"A acolhida é o início do vínculo e da identificação de demandas."],
+[E,"As atividades socioeducativas devem ser:","Planejadas, desenvolvidas e avaliadas, respeitando a faixa etária e os interesses do grupo",["Improvisadas, sem registro","Obrigatórias, com punição","Restritas a quem paga"],"Planejamento e avaliação garantem objetivo e qualidade."],
+[E,"A avaliação de uma oficina serve para:","Verificar resultados e aprimorar o planejamento",["Punir participantes","Excluir quem faltou","Dispensar registros"],"Faz parte do ciclo planejar, executar e avaliar."],
+ 
+// ---- Simulado 17
+[P,"Assinale a palavra escrita corretamente:","privilégio",["previlégio","privelégio","privilégeo"],"A palavra vem de 'privilégio', com i na primeira sílaba."],
+[P,"Em 'O CRAS atendeu apenas metade da demanda', infere-se que:","Parte da demanda ficou sem atendimento",["Toda a demanda foi atendida","Não houve demanda","O CRAS atendeu o dobro"],"'Apenas metade' implica que a outra metade não foi atendida."],
+[M,"Dividindo R$ 120 em partes proporcionais a 1, 2 e 3, a maior parte é:","R$ 60",["R$ 40","R$ 20","R$ 50"],"Soma das partes = 6; 120 ÷ 6 = 20; a maior é 3 × 20 = 60."],
+[M,"A área de um círculo de raio 3 cm é:","9π cm²",["6π cm²","3π cm²","18π cm²"],"A = π r² = π × 3² = 9π."],
+[I,"No PowerPoint, Shift + F5 inicia a apresentação:","A partir do slide atual",["Do primeiro slide","E fecha o arquivo","Salvando automaticamente"],"F5 inicia do primeiro slide."],
+[I,"O histórico do navegador registra:","Os endereços das páginas visitadas",["Apenas e-mails","Vírus detectados","Arquivos do Word"],"Pode ser consultado e apagado pelo usuário."],
+[E,"Na mediação de conflitos entre usuários, o profissional deve:","Escutar as partes, manter neutralidade e buscar um acordo respeitoso",["Tomar partido de um dos lados","Expor publicamente os envolvidos","Ignorar o conflito"],"A mediação preserva vínculos e a convivência."],
+[E,"O estabelecimento de limites com crianças deve ocorrer de modo:","Claro e respeitoso, sem violência física ou humilhação",["Por castigo físico","Por ameaças","Por humilhação pública"],"A Lei 13.010/2014 (Menino Bernardo) proíbe castigo físico e tratamento cruel."],
+[E,"Para prevenir acidentes durante as atividades com crianças, deve-se:","Supervisionar continuamente e manter o ambiente seguro",["Deixar o grupo sem supervisão","Oferecer objetos cortantes","Manter o piso molhado"],"Prevenção é o principal cuidado."],
+[E,"Antes de preparar ou servir alimentos, o primeiro cuidado é:","Lavar bem as mãos",["Usar o mesmo pano para tudo","Tocar o rosto","Provar com a mesma colher"],"A higiene das mãos previne contaminações."],
+ 
+// ---- Simulado 18
+[P,"O antônimo de 'inclusão' é:","Exclusão",["Integração","Adesão","Acolhida"],"Inclusão e exclusão têm sentidos opostos."],
+[P,"Assinale a frase correta quanto à concordância:","Cada um dos técnicos recebeu orientações.",["Cada um dos técnicos receberam orientações.","Fazem dez dias que não há atendimento.","Existe muitos casos urgentes."],"'Cada um' pede verbo no singular; 'fazer' (tempo) é impessoal; 'existem' concorda com 'casos'."],
+[M,"A solução do sistema x + y = 10 e x − y = 2 é:","x = 6 e y = 4",["x = 5 e y = 5","x = 7 e y = 3","x = 8 e y = 2"],"Somando as equações: 2x = 12, logo x = 6 e y = 4."],
+[M,"A solução de 2x − 4 > 6 é:","x > 5",["x > 3","x < 5","x > 10"],"2x > 10, logo x > 5."],
+[I,"A autenticação multifator (MFA) consiste em:","Usar dois ou mais fatores de verificação (ex.: senha e código enviado)",["Usar a mesma senha várias vezes","Desativar a senha","Compartilhar o login com colegas"],"Mesmo que a senha vaze, o segundo fator protege a conta."],
+[I,"A engenharia social é:","A manipulação de pessoas para obter informações ou acesso",["Uma técnica de formatar discos","Um tipo de antivírus","Uma rede social corporativa"],"O phishing é um exemplo."],
+[E,"Em caso de engasgo com obstrução total em adulto consciente, deve-se:","Fazer a manobra de Heimlich e acionar o atendimento especializado (SAMU 192)",["Dar água","Tapar a boca","Deitar e esperar"],"Se a pessoa perder a consciência, inicia-se a reanimação até a chegada do socorro."],
+[E,"Em caso de queimadura leve, deve-se:","Resfriar com água corrente em temperatura ambiente",["Passar manteiga","Estourar as bolhas","Aplicar gelo diretamente"],"Gelo, manteiga e pasta de dente podem agravar a lesão."],
+[E,"Em caso de convulsão, deve-se:","Proteger a cabeça, afastar objetos e não colocar nada na boca",["Colocar um objeto na boca","Segurar a pessoa com força","Dar água durante a crise"],"Depois, deitar de lado e acionar o SAMU se necessário."],
+[E,"Os registros de frequência e ocorrências devem ser:","Claros, objetivos, fiéis aos fatos e mantidos em sigilo",["Subjetivos e opinativos","Divulgados a qualquer pessoa","Dispensados em casos simples"],"O registro fundamenta o acompanhamento e deve respeitar a LGPD."]
+]
+}
+];
+// Para adicionar questões, acrescente itens ao final de 'bank' do módulo desejado (múltiplo de 'size').
+// Formato: [categoria, enunciado, certa, [erradas], explicação] (ou, com 6º item = 1: lista completa na ordem, sem embaralhar).
+ 
+const DURATION = 50 * 60;
+let mi = 0, curSim = 1, Q = [], cur = 0, answers = [], timer = null, timeLeft = DURATION;
+const $ = id => document.getElementById(id);
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const PAL = {
+  cinza:   { d:"#1e293b", m:"#475569", h:"#334155", l:"#f8fafc", b:"#e2e8f0", t:"#1e293b", s:"#cbd5e1" },
+  azul:    { d:"#1e3a8a", m:"#2563eb", h:"#1d4ed8", l:"#eff6ff", b:"#bfdbfe", t:"#1e40af", s:"#bfdbfe" },
+  rosa:    { d:"#be185d", m:"#db2777", h:"#be185d", l:"#fdf2f8", b:"#fbcfe8", t:"#9d174d", s:"#fce7f3" },
+  laranja: { d:"#c2410c", m:"#ea580c", h:"#c2410c", l:"#fff7ed", b:"#fed7aa", t:"#9a3412", s:"#ffedd5" },
+  roxo:    { d:"#5b21b6", m:"#7c3aed", h:"#6d28d9", l:"#f5f3ff", b:"#ddd6fe", t:"#5b21b6", s:"#ede9fe" }
+};
+const vars = k => { const c = PAL[k] || PAL.cinza; return Object.keys(c).map(x => `--${x}:${c[x]}`).join(";"); };
+const setTheme = k => document.documentElement.setAttribute("style", vars(k));
+const nSims = m => Math.floor(m.bank.length / m.size);
+function show(id) {
+  ["menu", "quiz", "result"].forEach(x => $(x).classList.add("hidden"));
+  $(id).classList.remove("hidden");
+  $("timer-box").classList.toggle("hidden", id !== "quiz");
+}
+ 
+function home() {
+  clearInterval(timer); setTheme("cinza");
+  $("sub").textContent = "Escolha o cargo e o tipo de simulado";
+  const groups = {};
+  MODS.forEach((m, i) => { (groups[m.cargo] = groups[m.cargo] || []).push(i); });
+  let h = '<h2 class="text-lg font-bold text-center mb-4">Escolha o cargo</h2><div class="space-y-4">';
+  for (const c in groups) {
+    const f = MODS[groups[c][0]];
+    h += `<div class="border border-slate-200 rounded-xl p-4" style="${vars(f.tema)};border-left:6px solid var(--m)"><p class="text-[10px] font-bold uppercase tracking-wide th-acc">Banca ${f.banca}</p><h3 class="font-bold text-slate-900 mb-3">${c}</h3><div class="grid gap-2 sm:grid-cols-2">`;
+    groups[c].forEach(i => {
+      const m = MODS[i];
+      h += `<button onclick="openMod(${i})" class="p-3 th-card rounded-lg text-left cursor-pointer"><span class="font-semibold th-acc block text-sm">${m.nome}</span><span class="text-xs th-acc">${nSims(m)} simulados · ${m.bank.length} questões</span></button>`;
+    });
+    h += "</div></div>";
+  }
+  $("menu-body").innerHTML = h + "</div>";
+  show("menu");
+}
+ 
+function openMod(i) {
+  clearInterval(timer);
+  mi = i; const m = MODS[i]; setTheme(m.tema);
+  $("sub").textContent = `Cargo: ${m.cargo} | Banca ${m.banca}`;
+  let h = `<button onclick="home()" class="text-xs bg-slate-200 hover:bg-slate-300 px-3 py-1.5 rounded text-slate-700 font-medium cursor-pointer mb-3">← Voltar aos cargos</button>
+    <p class="text-xs font-bold text-center th-acc uppercase tracking-wide mb-1">Cargo: ${m.cargo}</p>
+    <h2 class="text-lg font-bold text-center mb-1">Escolha um simulado</h2>
+    <p class="text-slate-600 text-sm text-center mb-5">${m.nome}. ${m.size} questões por simulado. Ao clicar na resposta, você vê na hora se acertou e a explicação.</p>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">`;
+  for (let s = 1; s <= nSims(m); s++) {
+    h += `<button onclick="start(${s})" class="p-4 th-card rounded-lg text-left cursor-pointer"><span class="font-bold th-acc block">Simulado ${String(s).padStart(2, "0")}</span><span class="text-xs th-acc">${m.titles[s - 1] || "Questões variadas"}</span></button>`;
+  }
+  h += `<button onclick="start(0)" class="p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-left cursor-pointer"><span class="font-bold text-emerald-900 block">Simulado Aleatório</span><span class="text-xs text-emerald-700">${m.size} questões sorteadas deste cargo (${m.bank.length})</span></button></div>`;
+  $("menu-body").innerHTML = h;
+  show("menu");
+}
+ 
+function start(sim) {
+  curSim = sim; const m = MODS[mi];
+  const raw = sim === 0 ? shuffle(m.bank).slice(0, m.size) : m.bank.slice((sim - 1) * m.size, sim * m.size);
+  Q = raw.map(r => ({
+    cat: r[0], q: r[1], exp: r[4],
+    opts: r[5] ? r[3].map(t => ({ t, ok: t === r[2] })) : shuffle([{ t: r[2], ok: true }, ...r[3].map(t => ({ t, ok: false }))])
+  }));
+  answers = Array(Q.length).fill(null); cur = 0; timeLeft = DURATION;
+  $("sim-title").textContent = `${m.cargo} - ` + (sim === 0 ? "Simulado Aleatório" : `Simulado ${String(sim).padStart(2, "0")} - ${m.titles[sim - 1] || ""}`);
+  show("quiz");
+  clearInterval(timer); timer = setInterval(tick, 1000); tick(true);
+  render();
+}
+ 
+function tick(first) {
+  if (!first) timeLeft--;
+  if (timeLeft <= 0) { finish(); return; }
+  $("timer").textContent = `${String(Math.floor(timeLeft / 60)).padStart(2, "0")}:${String(timeLeft % 60).padStart(2, "0")}`;
+}
+ 
+function render() {
+  const q = Q[cur], ans = answers[cur];
+  $("tracker").textContent = `Questão ${cur + 1} de ${Q.length}`;
+  $("cat").textContent = q.cat;
+  $("qtext").textContent = q.q;
+  $("bar").style.width = `${((cur + (ans !== null ? 1 : 0)) / Q.length) * 100}%`;
+  const box = $("opts"); box.innerHTML = "";
+  q.opts.forEach((o, i) => {
+    const b = document.createElement("button");
+    let cls = "w-full text-left p-4 rounded-lg border text-sm flex items-start gap-3 transition ";
+    if (ans === null) cls += "border-slate-200 bg-white hover:bg-slate-50 cursor-pointer";
+    else if (o.ok) cls += "border-emerald-500 bg-emerald-50 text-emerald-900 ring-1 ring-emerald-500";
+    else if (i === ans) cls += "border-rose-500 bg-rose-50 text-rose-900 ring-1 ring-rose-500";
+    else cls += "border-slate-200 bg-white opacity-60";
+    b.className = cls;
+    const mark = ans === null ? "" : o.ok ? " ✔" : i === ans ? " ✘" : "";
+    const lt = document.createElement("span"); lt.className = "font-semibold"; lt.textContent = String.fromCharCode(65 + i) + ")";
+    const tx = document.createElement("span"); tx.className = "flex-grow"; tx.textContent = o.t + mark;
+    b.append(lt, tx);
+    if (ans === null) b.onclick = () => { answers[cur] = i; render(); }; else b.disabled = true;
+    box.appendChild(b);
+  });
+  const ex = $("exp");
+  if (ans === null) ex.classList.add("hidden");
+  else {
+    const right = q.opts[ans].ok;
+    ex.className = "mt-5 p-4 rounded-lg border text-sm leading-relaxed " + (right ? "bg-emerald-50 border-emerald-200 text-emerald-900" : "bg-rose-50 border-rose-200 text-rose-900");
+    ex.textContent = (right ? "Correto! " : `Errado. A resposta certa é a letra ${String.fromCharCode(65 + q.opts.findIndex(o => o.ok))}. `) + q.exp;
+  }
+  $("prev").disabled = cur === 0;
+  const last = cur === Q.length - 1, nb = $("next");
+  nb.textContent = last ? "Finalizar" : "Próxima";
+  nb.className = (last ? "bg-emerald-600 hover:bg-emerald-700" : "th-btn") + " text-white font-medium py-2.5 px-6 rounded-lg text-sm cursor-pointer";
+}
+ 
+function go(d) {
+  if (d > 0 && cur === Q.length - 1) { finish(); return; }
+  cur = Math.max(0, Math.min(Q.length - 1, cur + d)); render();
+}
+ 
+function finish() {
+  clearInterval(timer); show("result");
+  const hits = Q.filter((q, i) => answers[i] !== null && q.opts[answers[i]].ok).length;
+  const pct = Math.round(hits / Q.length * 100);
+  $("r-score").textContent = `${hits} / ${Q.length}`; $("r-pct").textContent = pct + "%";
+  $("msg").textContent = pct >= 70 ? "Ótimo desempenho! Continue assim." : pct >= 50 ? "Bom caminho. Revise os erros abaixo." : "Vale revisar o conteúdo e refazer o simulado.";
+  const rv = $("review"); rv.innerHTML = "";
+  Q.forEach((q, i) => {
+    const a = answers[i], ok = a !== null && q.opts[a].ok;
+    const d = document.createElement("div");
+    d.className = "p-4 rounded-lg border text-sm space-y-1 " + (ok ? "bg-emerald-50 border-emerald-200" : "bg-rose-50 border-rose-200");
+    const l = ["font-semibold whitespace-pre-line", "", "", "text-slate-700"];
+    const t = [`${i + 1}. ${q.q}`, "Sua resposta: " + (a === null ? "não respondida" : q.opts[a].t), "Resposta certa: " + q.opts.find(o => o.ok).t, "Explicação: " + q.exp];
+    t.forEach((x, k) => { const e = document.createElement("div"); e.className = l[k]; e.textContent = x; d.appendChild(e); });
+    rv.appendChild(d);
+  });
+}
+ 
+home();
+</script>
+</body>
+</html>
+ 
+Claude terminou a resposta
