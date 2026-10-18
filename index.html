@@ -1,12 +1,12 @@
 
 
-Simulado acs · HTML
+Simulado acs extenso · HTML
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Simulados ACS - Agente Comunitário de Saúde</title>
+<title>Simulados ACS (questões extensas)</title>
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
@@ -27,7 +27,7 @@ Simulado acs · HTML
   <!-- MENU -->
   <section id="menu" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 my-6">
     <h2 class="text-lg font-bold text-center mb-1">Escolha um simulado</h2>
-    <p class="text-slate-600 text-sm text-center mb-5">Cada simulado tem 10 questões. Ao clicar na resposta, você vê na hora se acertou e a explicação.</p>
+    <p class="text-slate-600 text-sm text-center mb-5">Questões extensas, com textos, casos práticos e afirmativas (I, II, III). Ao clicar na resposta, você vê na hora se acertou e a explicação.</p>
     <div id="menu-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
   </section>
  
@@ -46,7 +46,7 @@ Simulado acs · HTML
     <div class="h-2 bg-slate-200 rounded-full overflow-hidden"><div id="bar" class="h-full bg-blue-600 transition-all" style="width:0%"></div></div>
  
     <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-      <h3 id="qtext" class="text-base font-medium text-slate-900 mb-5 leading-relaxed"></h3>
+      <h3 id="qtext" class="whitespace-pre-line text-base font-medium text-slate-900 mb-5 leading-relaxed"></h3>
       <div id="opts" class="space-y-3"></div>
       <div id="exp" class="hidden mt-5 p-4 rounded-lg border text-sm leading-relaxed"></div>
     </div>
@@ -81,102 +81,49 @@ Simulado acs · HTML
 <footer class="text-center py-5 text-xs text-slate-500">Simulados de estudo - Agente Comunitário de Saúde / GL Consultoria</footer>
  
 <script>
-// Banco de questões - Agente Comunitário de Saúde (ESF) - Banca GL Consultoria
-// Formato: [categoria, enunciado, resposta certa, [3 erradas], explicação]
-// A cada 10 questões seguidas forma 1 simulado automaticamente.
+// Banco de questões EXTENSAS - Agente Comunitário de Saúde (ESF) - estilo banca GL Consultoria
+// Formato: [categoria, enunciado, resposta certa, [erradas] (ou lista completa na ordem, se o 6º item for 1), explicação, 1 = não embaralhar]
 const P="Língua Portuguesa", M="Matemática e Raciocínio Lógico", E="Conhecimentos Específicos";
 const BANK = [
-// ---- Simulado 01: SUS e controle social
-[P,"Em 'Vacine-se hoje!', predomina a função da linguagem:","Conativa (apelativa)",["Referencial","Emotiva","Poética"],"O texto procura levar o leitor a agir, característica da função conativa."],
-[P,"Em 'Estou morrendo de fome', há a figura de linguagem:","Hipérbole",["Metáfora","Eufemismo","Ironia"],"A hipérbole exagera a ideia para dar ênfase."],
-[M,"Um capital de R$ 1.000 aplicado a juros simples de 2% ao mês durante 5 meses rende de juros:","R$ 100",["R$ 10","R$ 110","R$ 200"],"J = C × i × t = 1.000 × 0,02 × 5 = 100."],
-[M,"Em uma comunidade de 2.000 pessoas, 15% são crianças. Quantas são crianças?","300",["150","200","350"],"0,15 × 2.000 = 300."],
-[E,"O princípio do SUS que garante o acesso de todos às ações e serviços de saúde, sem discriminação, é a:","Universalidade",["Equidade","Hierarquização","Regionalização"],"Saúde é direito de todos e dever do Estado."],
-[E,"O princípio da equidade no SUS significa:","Tratar de forma desigual os desiguais, priorizando quem mais precisa",["Tratar todos exatamente igual","Atender só quem paga","Atender apenas idosos"],"Busca reduzir desigualdades, oferecendo mais a quem tem maior necessidade."],
-[E,"A integralidade no SUS pressupõe:","Atenção ao indivíduo em todos os níveis: promoção, prevenção, tratamento e reabilitação",["Atendimento apenas de urgência","Foco só na doença","Ações só hospitalares"],"Vê a pessoa como um todo e articula as ações de saúde."],
-[E,"A Lei nº 8.080/1990 é a:","Lei Orgânica da Saúde, que organiza e regula o funcionamento do SUS",["Lei que cria o Bolsa Família","Lei do ECA","Lei da previdência"],"Dispõe sobre promoção, proteção e recuperação da saúde."],
-[E,"A Lei nº 8.142/1990 dispõe sobre:","A participação da comunidade na gestão do SUS e as transferências de recursos financeiros",["As atribuições do ACS","A vacinação obrigatória","A saúde suplementar"],"Cria as Conferências e os Conselhos de Saúde."],
-[E,"Os Conselhos de Saúde são órgãos:","Permanentes e deliberativos, com participação paritária de usuários",["Temporários e apenas consultivos","Exclusivos de médicos","Privados"],"Os usuários representam 50% dos membros. É o controle social do SUS."],
+// ---- Simulado 01: SUS, controle social, PNAB e ACS
+[P,"Leia o texto a seguir.\n\nA Atenção Primária à Saúde é o primeiro contato da população com o sistema de saúde. Quando bem estruturada, resolve a maior parte dos problemas de saúde da comunidade, evita internações desnecessárias e reduz custos. Nesse cenário, o agente comunitário de saúde, por viver na própria comunidade, funciona como elo entre as famílias e a equipe, levando informações em ambas as direções.\n\nCom base no texto, é correto afirmar que o agente comunitário de saúde:","contribui para que as informações circulem entre as famílias e a equipe de saúde.",["substitui os demais profissionais da equipe de saúde.","atua exclusivamente em ambiente hospitalar.","é o responsável pela decisão sobre as internações."],"O texto o descreve como 'elo' que leva informações nos dois sentidos."],
+[P,"Assinale a alternativa que apresenta frase redigida de acordo com a norma-padrão da língua portuguesa:","A equipe de saúde recomendou às famílias que levassem as crianças à unidade para vacinação.",["A equipe de saúde recomendou as famílias que levassem as crianças a unidade para vacinação.","A equipe de saúde recomendou à famílias que levassem as crianças à unidade para vacinação.","A equipe de saúde recomendou às famílias que levassem as crianças à unidade à partir de segunda."],"'Às famílias' e 'à unidade' levam crase (preposição + artigo). Não há crase antes de 'partir' nem antes de plural sem artigo ('à famílias')."],
+[M,"Uma equipe de saúde da família acompanha 1.200 famílias. Na primeira semana do mês, os agentes visitaram 15% delas. Na segunda semana, visitaram 25% das famílias que ainda não tinham sido visitadas. Ao final das duas semanas, o total de famílias visitadas foi de:","435",["300","480","375"],"15% de 1.200 = 180. Restam 1.020; 25% de 1.020 = 255. Total: 180 + 255 = 435."],
+[M,"Uma unidade de saúde consome 3 litros de álcool em gel a cada 5 dias. Mantido o mesmo ritmo de consumo, a quantidade necessária para 30 dias é de:","18 litros",["15 litros","20 litros","9 litros"],"30 dias equivalem a 6 períodos de 5 dias; 6 × 3 = 18 litros."],
+[E,"Sobre os princípios e diretrizes do Sistema Único de Saúde (SUS), analise as afirmativas a seguir.\n\nI. A universalidade garante a todos os cidadãos o acesso às ações e aos serviços de saúde.\nII. A equidade propõe tratar todas as pessoas de forma idêntica, sem considerar as diferenças de necessidade.\nIII. A participação da comunidade na gestão do SUS é exercida por meio dos Conselhos e das Conferências de Saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II.","Apenas I e III.","I, II e III."],"A equidade trata de forma desigual os desiguais, priorizando quem mais precisa; por isso a afirmativa II é falsa.",1],
+[E,"Em uma reunião do Conselho Municipal de Saúde, representantes dos usuários, dos trabalhadores e dos gestores discutiram o plano municipal de saúde. Esse espaço de participação, previsto na Lei nº 8.142/1990, caracteriza-se por ser:","permanente e deliberativo, com os usuários representando metade dos membros.",["temporário e apenas consultivo, sem poder de decisão.","exclusivo de gestores e prestadores de serviço.","privado e dependente de autorização judicial."],"O Conselho de Saúde é órgão colegiado permanente e deliberativo, com composição paritária (50% de usuários)."],
+[E,"Maria procura a unidade básica de saúde com febre persistente. A equipe a avalia, resolve o caso e, quando necessário, a encaminha a outro ponto da rede, mantendo o acompanhamento. Segundo a PNAB (Portaria nº 2.436/2017), esse exemplo ilustra a função de:","coordenar o cuidado e ordenar a rede de atenção à saúde.",["atender apenas casos de urgência hospitalar.","oferecer cuidado fragmentado, sem vínculo com o usuário.","substituir os demais pontos da rede de atenção."],"A APS é a porta de entrada preferencial, coordena o cuidado e ordena o acesso à rede."],
+[E,"Em relação às atividades do agente comunitário de saúde (Lei nº 11.350/2006), analise as afirmativas a seguir.\n\nI. O ACS deve residir na área da comunidade em que atuar.\nII. Cabe ao ACS prescrever medicamentos aos moradores da microárea.\nIII. O ACS realiza visitas domiciliares e orienta sobre a prevenção de doenças e a promoção da saúde.\n\nEstá(ão) correta(s):","Apenas I e III.",["Apenas I.","Apenas II e III.","Apenas I e III.","I, II e III."],"Prescrever medicamentos não é atribuição do ACS; a afirmativa II é falsa.",1],
+[E,"Ao iniciar o trabalho em uma microárea, o agente comunitário de saúde percorre as ruas, identifica as famílias, registra as moradias, as condições de saneamento e os grupos prioritários (gestantes, crianças, idosos e pessoas com doenças crônicas). Essa atividade corresponde, principalmente, ao:","cadastramento das famílias e ao mapeamento do território.",["tratamento clínico das doenças identificadas.","procedimento de aplicação de vacinas.","processo de emissão de atestados médicos."],"O cadastro e o mapeamento orientam o planejamento das ações da equipe."],
+[E,"Durante uma visita domiciliar, o ACS identifica um morador com sintomas de doença de notificação compulsória. A conduta mais adequada é:","comunicar imediatamente a equipe de saúde, para que a notificação e as medidas de vigilância sejam realizadas.",["aguardar que o morador procure a unidade por conta própria.","orientar que ele não procure atendimento para evitar exames.","divulgar o caso entre os vizinhos para alertar a comunidade."],"A notificação é obrigatória e permite à vigilância agir rapidamente, respeitando o sigilo."],
  
-// ---- Simulado 02: PNAB e legislação do ACS
-[P,"Um folheto que ensina como prevenir a dengue é um texto predominantemente:","Injuntivo (instrucional)",["Narrativo","Poético","Descritivo"],"Orienta e instrui o leitor sobre como agir."],
-[P,"A palavra 'infelizmente' é formada por:","Derivação prefixal e sufixal",["Composição por justaposição","Composição por aglutinação","Onomatopeia"],"in- (prefixo) + feliz + -mente (sufixo)."],
-[M,"Se 3 agentes visitam 90 casas em 5 dias, 6 agentes visitam 180 casas em:","5 dias",["10 dias","2,5 dias","6 dias"],"Regra de três composta: dobrando agentes e casas, o prazo se mantém."],
-[M,"As raízes da equação x² − 5x + 6 = 0 são:","2 e 3",["1 e 6","−2 e −3","5 e 6"],"Soma = 5 e produto = 6, logo as raízes são 2 e 3."],
-[E,"Segundo a PNAB (Portaria nº 2.436/2017), a Atenção Primária é:","Porta de entrada preferencial e ordenadora do cuidado na rede de atenção",["Serviço só para urgências","Atendimento exclusivo hospitalar","Atenção especializada de alta complexidade"],"Coordena o cuidado e organiza o acesso às demais redes."],
-[E,"A Estratégia Saúde da Família (ESF) é considerada pela PNAB:","Estratégia prioritária de expansão e consolidação da Atenção Primária",["Programa temporário","Serviço apenas de vacinação","Serviço privado"],"Reorganiza a atenção básica com foco na família e no território."],
-[E,"A equipe de Saúde da Família é composta, no mínimo, por:","Médico, enfermeiro, técnico ou auxiliar de enfermagem e agente comunitário de saúde",["Apenas médico e enfermeiro","Dentista e psicólogo","Somente agentes comunitários"],"Pode contar com outros profissionais, como a equipe de saúde bucal."],
-[E,"A Lei nº 11.350/2006 regulamenta:","As atividades de Agente Comunitário de Saúde e de Agente de Combate às Endemias",["O Sistema de Vigilância Sanitária","O Estatuto do Idoso","A Lei Orgânica da Saúde"],"Trata de atribuições, contratação e vínculo."],
-[E,"Segundo a Lei nº 11.350/2006, um requisito do ACS é:","Residir na área da comunidade em que atuar",["Ter formação superior","Morar em outro município","Ser servidor federal"],"O vínculo com a comunidade é essencial ao trabalho."],
-[E,"Não é atribuição do ACS:","Prescrever medicamentos",["Cadastrar famílias","Orientar sobre vacinas","Realizar visitas domiciliares"],"Prescrição é atividade de profissional habilitado."],
+// ---- Simulado 02: imunização, atribuições e doenças
+[P,"Leia o texto a seguir.\n\nA vacinação é uma das medidas de saúde pública de melhor custo-benefício. Doenças como a poliomielite e o sarampo foram controladas graças à imunização em massa. No entanto, a queda nas coberturas vacinais, impulsionada pela desinformação, ameaça esses avanços e permite o retorno de doenças que já estavam sob controle.\n\nSegundo o texto, a queda nas coberturas vacinais:","pode provocar o retorno de doenças que já estavam controladas.",["é consequência do controle completo das doenças.","resulta do excesso de informação científica.","não interfere na saúde coletiva."],"O texto afirma que a queda 'permite o retorno de doenças que já estavam sob controle'."],
+[P,"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão:","Devem ser realizadas visitas domiciliares semanais às famílias de risco.",["Deve ser realizado visitas domiciliares semanais às famílias de risco.","Haviam famílias em situação de risco na microárea.","Fazem dois meses que o agente iniciou o cadastramento."],"O verbo acompanha o sujeito 'visitas' (plural). 'Haver' (existir) e 'fazer' (tempo) são impessoais."],
+[M,"Uma campanha de vacinação atendeu 840 crianças em 7 dias, com o mesmo número de atendimentos por dia. Mantido esse ritmo, o número de crianças atendidas em 12 dias será de:","1.440",["1.260","1.200","1.680"],"840 ÷ 7 = 120 por dia; 120 × 12 = 1.440."],
+[M,"Um agente comunitário registrou o número de visitas realizadas em cinco dias: 12, 15, 9, 15 e 14. A média, a mediana e a moda desse conjunto são, respectivamente:","13, 14 e 15.",["13, 15 e 14.","14, 13 e 15.","13, 12 e 15."],"Soma = 65, média = 13. Ordenando: 9, 12, 14, 15, 15; a mediana é 14 e a moda é 15."],
+[E,"Em uma unidade de saúde, a geladeira de vacinas ficou desligada durante a noite e a temperatura saiu da faixa de +2 °C a +8 °C. Quanto à conservação dos imunobiológicos (cadeia de frio), a conduta correta é:","isolar os imunobiológicos, comunicar a coordenação e aguardar avaliação técnica antes de qualquer uso.",["usar normalmente, pois a variação é irrelevante.","descartar tudo sem registrar a ocorrência.","congelar as vacinas para preservá-las."],"Variações de temperatura podem comprometer a eficácia; a decisão é técnica e deve ser registrada."],
+[E,"Sobre o aleitamento materno e a alimentação complementar, analise as afirmativas a seguir.\n\nI. Até os seis meses de idade, o bebê deve receber leite materno exclusivo.\nII. A partir dos seis meses, inicia-se a alimentação complementar, mantendo-se o leite materno.\nIII. Água e chás devem ser oferecidos desde o primeiro mês para evitar cólicas.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Antes dos seis meses, o leite materno exclusivo supre as necessidades do bebê, inclusive de líquidos.",1],
+[E,"Joana, de 22 anos, está grávida de 10 semanas e ainda não iniciou o pré-natal, pois acredita que só precisa consultar perto do parto. A orientação mais adequada do agente comunitário de saúde é:","explicar a importância do início precoce do pré-natal e ajudar a agendar a primeira consulta na unidade.",["concordar e aguardar o final da gestação.","sugerir que ela use vitaminas por conta própria.","orientar que procure atendimento apenas se sentir dor."],"O pré-natal precoce reduz riscos para a mãe e para o bebê."],
+[E,"Sobre a dengue, analise as afirmativas a seguir.\n\nI. A eliminação de água parada é a principal medida de prevenção.\nII. Dor abdominal intensa e vômitos persistentes são sinais de alarme.\nIII. O ácido acetilsalicílico (AAS) é recomendado para baixar a febre.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"O AAS é contraindicado na suspeita de dengue, pelo risco de sangramento.",1],
+[E,"Em visita domiciliar, o ACS encontra um morador com tosse há mais de três semanas, febre no fim da tarde e emagrecimento. A conduta adequada é:","encaminhá-lo à unidade de saúde para investigação de tuberculose e comunicar a equipe.",["orientar apenas o uso de xarope caseiro.","aguardar a tosse passar espontaneamente.","dizer que se trata de alergia e dispensar a avaliação."],"Tosse por três semanas ou mais caracteriza o sintomático respiratório."],
+[E,"Em uma ação educativa, um participante afirma que o HIV pode ser transmitido por abraço e pelo uso do mesmo copo. A resposta correta do ACS é:","o HIV não se transmite por contato social casual; a transmissão ocorre por sangue, relação sexual sem proteção e de mãe para filho.",["isso está correto, por isso é preciso evitar contato com pessoas com HIV.","a transmissão ocorre por picada de mosquito e por tosse.","a transmissão ocorre somente em hospitais."],"Combater o estigma faz parte da educação em saúde."],
  
-// ---- Simulado 03: atribuições do ACS, imunização e notificação
-[P,"Em 'Os agentes visitaram as famílias', o sujeito é:","Simples: 'Os agentes'",["Oculto","Indeterminado","Inexistente"],"Está explícito e tem um só núcleo ('agentes')."],
-[P,"Assinale a frase correta quanto à concordância:","Vendem-se casas nesse bairro.",["Vende-se casas nesse bairro.","Houveram muitas visitas ontem.","Fazem três anos que me mudei."],"Na voz passiva sintética o verbo concorda com o sujeito ('casas'); 'haver' e 'fazer' (tempo) são impessoais."],
-[M,"Em um sorteio entre 20 famílias, 5 têm gestantes. A probabilidade de sortear uma família com gestante é:","1/4",["1/5","1/2","5/4"],"5/20 = 1/4."],
-[M,"A média geométrica entre 4 e 9 é:","6",["6,5","13","36"],"√(4 × 9) = √36 = 6."],
-[E,"A visita domiciliar do ACS tem por finalidade:","Acompanhar as famílias, orientar e identificar situações de risco",["Substituir a consulta médica","Cobrar taxas","Aplicar procedimentos de enfermagem"],"É o principal instrumento de vínculo entre equipe e comunidade."],
-[E,"Em relação à gestante, o ACS deve:","Acompanhar e incentivar o início precoce e a regularidade do pré-natal",["Indicar medicamentos","Realizar o parto","Desencorajar consultas"],"O pré-natal reduz riscos para a mãe e o bebê."],
-[E,"O aleitamento materno deve ser exclusivo até:","6 meses de vida",["2 meses","4 meses","1 ano"],"Depois, inicia-se a alimentação complementar, mantendo o leite materno."],
-[E,"A vacina BCG, aplicada ao nascer, previne:","As formas graves de tuberculose",["Sarampo","Hepatite A","Dengue"],"Protege principalmente contra a tuberculose miliar e meníngea."],
-[E,"A cadeia de frio das vacinas exige conservação, em geral, entre:","+2 °C e +8 °C",["−20 °C e −10 °C","+10 °C e +15 °C","0 °C e −5 °C"],"Fora dessa faixa, o imunobiológico pode perder a eficácia."],
-[E,"A notificação compulsória de doenças é:","Obrigatória para profissionais e serviços de saúde",["Facultativa","Feita só pelo paciente","Proibida sem autorização judicial"],"Permite a vigilância epidemiológica agir rapidamente."],
- 
-// ---- Simulado 04: epidemiologia e arboviroses
-[P,"Em 'A dengue é grave; portanto, é preciso prevenir', o conectivo 'portanto' indica:","Conclusão",["Oposição","Causa","Adição"],"Introduz a consequência do que foi afirmado antes."],
-[P,"Na frase 'O ACS é o elo entre a comunidade e a equipe de saúde', a ideia central é:","O ACS faz a ligação entre a comunidade e a equipe",["O ACS substitui o médico","O ACS trabalha isolado","O ACS só cadastra famílias"],"'Elo' indica ligação entre as duas partes."],
-[M,"O valor de sen 30° é:","1/2",["√3/2","√2/2","1"],"É um valor notável da trigonometria."],
-[M,"Uma caixa d'água cúbica de 2 m de aresta tem volume de:","8 m³ (8.000 litros)",["4 m³","6 m³","16 m³"],"V = 2 × 2 × 2 = 8 m³; 1 m³ = 1.000 L."],
-[E,"O período de incubação de uma doença é:","O intervalo entre a exposição ao agente e o aparecimento dos primeiros sintomas",["O tempo de duração da cura","O tempo entre duas doses de vacina","O período de internação"],"Durante ele, a pessoa pode ainda não apresentar sintomas."],
-[E,"Vetor é:","O organismo que transporta e transmite o agente infeccioso a outro ser vivo",["Qualquer medicamento","Uma vacina","O local de tratamento"],"Ex.: o mosquito Aedes aegypti na dengue."],
-[E,"A vigilância sanitária atua sobre:","Riscos à saúde ligados a produtos, serviços e ambientes, como alimentos e estabelecimentos",["Apenas doenças transmissíveis","Só o controle de natalidade","Somente vacinas"],"Fiscaliza para prevenir riscos à população."],
-[E,"A principal forma de prevenir a dengue é:","Eliminar locais com água parada onde o mosquito se reproduz",["Tomar antibiótico","Evitar contato com pessoas","Beber água fervida apenas"],"O Aedes aegypti se reproduz em água parada limpa."],
-[E,"São sinais de alarme da dengue:","Dor abdominal intensa, vômitos persistentes e sangramentos",["Apenas coriza","Dor de ouvido","Tosse leve"],"Exigem atendimento de saúde imediato."],
-[E,"Zika e chikungunya são transmitidas pelo mesmo vetor da dengue, que é o:","Aedes aegypti",["Barbeiro","Flebotomíneo","Caramujo"],"O combate ao mosquito previne as três doenças."],
- 
-// ---- Simulado 05: doenças de interesse em saúde pública
-[P,"Assinale a frase em que há regência e crase corretas:","Chegamos ao posto de saúde às oito horas.",["Chegamos no posto de saúde às oito horas.","Chegamos ao posto de saúde as oito horas.","Chegamos em o posto de saúde às oito horas."],"'Chegar' pede a preposição 'a'; antes de hora feminina há crase."],
-[P,"Assinale a frase em que a crase está correta:","Fui à unidade de saúde ontem.",["Fui à pé até a unidade.","Vou à visitar as famílias.","Refiro-me à elas."],"'À unidade' = a + a. Não há crase antes de palavra masculina, verbo ou pronome pessoal."],
-[M,"A solução do sistema x + y = 12 e 2x + y = 20 é:","x = 8 e y = 4",["x = 4 e y = 8","x = 6 e y = 6","x = 10 e y = 2"],"Subtraindo as equações: x = 8; logo y = 4."],
-[M,"O valor de 2³ × 2² é:","32",["16","64","10"],"Soma dos expoentes: 2⁵ = 32."],
-[E,"A doença de Chagas é transmitida principalmente pelo:","Barbeiro (triatomíneo)",["Aedes aegypti","Caramujo","Flebotomíneo"],"Causada pelo Trypanosoma cruzi, também pode ser transmitida por alimentos contaminados e de mãe para filho."],
-[E,"A esquistossomose é adquirida pelo contato com:","Água contaminada com larvas liberadas por caramujos",["Mordida de morcego","Picada de pernilongo","Alimentos mal congelados"],"O saneamento básico é a principal medida preventiva."],
-[E,"Em casos de diarreia, a medida mais importante para evitar a desidratação é:","Oferecer soro de reidratação oral e líquidos",["Suspender toda a ingestão de líquidos","Dar antibiótico sem orientação","Usar laxantes"],"Procurar a unidade de saúde se houver sinais de desidratação."],
-[E,"O sintomático respiratório, em busca ativa de tuberculose, é a pessoa com:","Tosse por três semanas ou mais",["Febre por um dia","Dor de cabeça isolada","Coriza por dois dias"],"Deve ser encaminhada para exame e avaliação."],
-[E,"A hanseníase se manifesta, entre outros sinais, por:","Manchas na pele com perda de sensibilidade",["Manchas que coçam muito e somem em horas","Tosse seca","Dor ao urinar"],"Tem cura, e o tratamento é gratuito no SUS."],
-[E,"Sobre as hepatites virais, é correto afirmar:","Existe vacina para a hepatite B",["Todas se transmitem pelo ar","Não há medidas de prevenção","A hepatite A é transmitida por sangue apenas"],"A hepatite A é fecal-oral, ligada a água e alimentos contaminados."],
- 
-// ---- Simulado 06: raiva, tétano, crônicas e ISTs
-[P,"Assinale a frase pontuada corretamente:","Maria, agente de saúde, visitou a casa.",["Maria agente, de saúde visitou a casa.","Maria, agente de saúde visitou, a casa.","Maria agente de saúde, visitou a casa."],"O aposto explicativo fica entre vírgulas."],
-[P,"Assinale a grafia correta:","hipertensão",["hipertenção","ipertensão","hipertensaõ"],"A palavra deriva de 'tensão', com 's' e 'ão'."],
-[M,"A razão entre 8 e 20, na forma simplificada, é:","2/5",["4/5","1/2","3/5"],"8/20 dividido por 4 = 2/5."],
-[M,"Um produto de R$ 150 recebe desconto de 20%. O novo preço é:","R$ 120",["R$ 130","R$ 110","R$ 100"],"20% de 150 = 30; 150 − 30 = 120."],
-[E,"Em caso de mordedura por animal suspeito de raiva, o primeiro cuidado é:","Lavar o ferimento com água corrente e sabão e procurar a unidade de saúde",["Apenas passar álcool","Fechar o ferimento com curativo apertado","Aguardar sem fazer nada"],"A avaliação decide sobre soro e vacina antirrábica."],
-[E,"A principal forma de prevenir o tétano é:","Manter a vacinação em dia (dT)",["Evitar luz solar","Usar repelente","Tomar vitaminas"],"A bactéria entra por ferimentos contaminados."],
-[E,"Pressão arterial persistentemente elevada caracteriza:","Hipertensão arterial",["Diabetes","Anemia","Hipotensão"],"Em geral, valores iguais ou acima de 140/90 mmHg, confirmados em medições repetidas."],
-[E,"São sinais clássicos do diabetes:","Muita sede, muita urina, fome excessiva e perda de peso",["Tosse e coriza","Dor de ouvido","Manchas pelo corpo"],"O acompanhamento e a adesão ao tratamento previnem complicações."],
-[E,"A sífilis é causada pela bactéria:","Treponema pallidum",["Vibrio cholerae","Mycobacterium leprae","Clostridium tetani"],"Pode ser tratada com penicilina; na gestação, o tratamento evita a sífilis congênita."],
-[E,"O HIV NÃO se transmite por:","Abraço e compartilhamento de talheres",["Relação sexual sem preservativo","Compartilhamento de seringas","Transmissão vertical (da mãe para o bebê)"],"A transmissão ocorre por sangue, secreções sexuais e leite materno ou gestação."],
- 
-// ---- Simulado 07: ISTs, saneamento e saúde mental
-[P,"Em 'Se vacine; a proteção é de todos', temos como recurso de coesão:","O ponto e vírgula, que liga ideias relacionadas",["Um erro de pontuação","Um verbo auxiliar","Uma preposição"],"O ponto e vírgula separa orações com relação de sentido próxima."],
-[P,"Assinale a palavra com acentuação correta:","farmácia",["farmacia","fármacia","farmácía"],"É paroxítona terminada em ditongo, e por isso leva acento."],
-[M,"Se 4 agentes concluem um trabalho em 6 dias, 3 agentes, no mesmo ritmo, concluem em:","8 dias",["4,5 dias","9 dias","7 dias"],"Grandezas inversamente proporcionais: 4 × 6 = 3 × x, logo x = 8."],
-[M,"Sendo f(x) = 2x + 3, o valor de f(4) é:","11",["8","14","9"],"2 × 4 + 3 = 11."],
-[E,"A vacina contra o HPV é indicada principalmente para:","Crianças e adolescentes, antes do início da vida sexual",["Somente idosos","Apenas gestantes","Somente quem já tem verrugas"],"Previne cânceres e verrugas associados ao vírus, como o de colo do útero."],
-[E,"Para tornar a água de beber mais segura em casa, deve-se:","Filtrar, ferver ou usar hipoclorito de sódio conforme orientação, e manter a vasilha tampada",["Beber direto da torneira sempre","Guardar em recipientes abertos","Usar água parada de poças"],"O hipoclorito exige tempo de contato (cerca de 30 minutos) antes do consumo."],
-[E,"Diante de uma pessoa com sinais de intenso sofrimento psíquico ou risco de suicídio, o ACS deve:","Escutar sem julgamentos e encaminhar à equipe e à rede de atenção",["Minimizar o problema","Contar o caso a vizinhos","Prometer sigilo absoluto mesmo diante de risco"],"Em risco imediato, acione o SAMU (192) ou o CVV (188), conforme o caso."],
-[E,"A Rede de Atenção Psicossocial (RAPS) inclui:","Os Centros de Atenção Psicossocial (CAPS), a Atenção Básica e serviços de urgência",["Apenas hospitais psiquiátricos","Somente consultórios particulares","Só escolas"],"A atenção é comunitária e em liberdade, articulada em rede."],
-[E,"A principal medida de prevenção da febre amarela é:","A vacinação",["Evitar o contato com animais domésticos","Usar máscara apenas","Beber água filtrada"],"A doença é transmitida por mosquitos e pode ser grave."],
-[E,"O sarampo é prevenido pela vacina:","Tríplice viral",["BCG","dT","Pentavalente"],"A vacina também protege contra caxumba e rubéola."]
+// ---- Simulado 03: saneamento, saúde mental, crônicas, ética e educação em saúde
+[P,"Leia o texto a seguir.\n\nEm muitos bairros, o descarte inadequado de lixo favorece a proliferação de ratos e mosquitos. A coleta seletiva e a destinação correta dos resíduos reduzem a poluição e previnem doenças. Cabe a cada morador colaborar, mas o poder público tem o dever de garantir o serviço de coleta e o saneamento básico.\n\nO texto defende que:","moradores e poder público têm responsabilidades na gestão dos resíduos e na prevenção de doenças.",["somente os moradores são responsáveis pelo lixo.","a coleta seletiva aumenta a poluição.","o saneamento básico é dispensável."],"O texto divide a responsabilidade entre moradores e poder público."],
+[P,"Assinale a alternativa em que a pontuação está de acordo com a norma-padrão:","Os agentes, que conhecem bem a comunidade, orientaram as famílias.",["Os agentes que, conhecem bem a comunidade orientaram as famílias.","Os agentes, que conhecem bem a comunidade orientaram, as famílias.","Os agentes que conhecem bem, a comunidade, orientaram as famílias."],"A oração explicativa 'que conhecem bem a comunidade' fica entre vírgulas."],
+[M,"Uma caixa d'água tem formato de paralelepípedo, com 2 m de comprimento, 1,5 m de largura e 1 m de altura. Quando totalmente cheia, ela comporta:","3.000 litros.",["300 litros.","30.000 litros.","4.500 litros."],"V = 2 × 1,5 × 1 = 3 m³, e 1 m³ equivale a 1.000 litros."],
+[M,"Para tratar a água de um tambor, um agente orienta o uso de 2 gotas de hipoclorito para cada litro. Para um tambor com 200 litros, serão necessárias:","400 gotas.",["100 gotas.","200 gotas.","40 gotas."],"2 gotas × 200 litros = 400 gotas."],
+[E,"Sobre o consumo e o armazenamento de água, analise as afirmativas a seguir.\n\nI. A água de consumo deve ser filtrada, fervida ou tratada com hipoclorito, conforme a orientação.\nII. As caixas d'água devem permanecer tampadas e ser limpas periodicamente.\nIII. Pode-se beber água de poço desprotegido, pois ela é sempre potável.\n\nEstá(ão) correta(s):","Apenas I e II.",["Apenas I.","Apenas II e III.","Apenas I e II.","I, II e III."],"Água de fonte desprotegida pode estar contaminada, por isso a afirmativa III é falsa.",1],
+[E,"Um idoso viúvo, que antes participava de atividades no bairro, passou a isolar-se, relata cansaço constante e diz que \"não faz mais sentido viver\". A atitude mais adequada do ACS é:","acolher e escutar sem julgamento, considerar o relato um sinal de alerta e comunicar imediatamente a equipe para avaliação e encaminhamento.",["dizer que isso é frescura e que logo passa.","prometer manter o relato em segredo absoluto.","aguardar a melhora espontânea sem comunicar ninguém."],"Sinais de risco de suicídio exigem acolhimento e encaminhamento rápidos."],
+[E,"Sobre a Rede de Atenção Psicossocial (RAPS), é correto afirmar que:","os Centros de Atenção Psicossocial (CAPS) oferecem cuidado comunitário a pessoas com sofrimento mental intenso.",["o CAPS é hospital psiquiátrico de internação de longa permanência.","o CAPS atende apenas mediante ordem judicial.","a RAPS exclui a Atenção Básica."],"O modelo é comunitário e em liberdade, articulado com a Atenção Básica."],
+[E,"O senhor Antônio, de 62 anos e hipertenso, parou de tomar o medicamento porque \"a pressão normalizou\". A orientação mais adequada do ACS é:","explicar que a pressão controlada resulta do tratamento, orientar a continuidade do uso e avisar a equipe para reavaliação.",["concordar, pois a pressão normalizada dispensa o remédio.","sugerir dobrar a dose quando sentir mal-estar.","orientar a trocar o remédio por chás."],"A adesão ao tratamento previne complicações como AVC e infarto."],
+[E,"Em uma visita, o ACS toma conhecimento de que um vizinho tem uma doença. Outro morador pergunta sobre a saúde desse vizinho. A conduta ética é:","manter o sigilo das informações obtidas no exercício da função, compartilhando-as apenas com a equipe, quando necessário.",["contar tudo, pois a comunidade tem direito à informação.","comentar apenas com os amigos mais próximos.","divulgar nas redes sociais para alertar a vizinhança."],"O sigilo é dever ético e protege a dignidade das pessoas."],
+[E,"Para uma ação educativa sobre a prevenção da dengue na comunidade, a estratégia mais adequada é:","planejar a atividade com linguagem acessível, mobilizar moradores e lideranças e dialogar a partir da realidade do território.",["apenas distribuir folhetos, sem conversar com os moradores.","realizar palestra técnica com linguagem difícil.","culpar os moradores pelos casos da doença."],"A educação em saúde é participativa e considera o contexto local."]
 ];
  
 const SIZE = 10;
-const TITLES = [
-  "SUS, Leis 8.080/90 e 8.142/90", "PNAB, ESF e Lei 11.350/2006", "Atribuições do ACS, Imunização e Notificação",
-  "Epidemiologia e Arboviroses", "Doenças de Interesse em Saúde Pública", "Raiva, Tétano, Crônicas e ISTs",
-  "ISTs, Saneamento e Saúde Mental"
-];
+const TITLES = ["SUS, Controle Social, PNAB e ACS", "Imunização, Atribuições e Doenças", "Saneamento, Saúde Mental, Crônicas e Ética"];
  
 const FIXED = Math.floor(BANK.length / SIZE);
 const DURATION = 50 * 60;
@@ -195,7 +142,7 @@ const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { c
   }
   h += `<button onclick="start(0)" class="p-4 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-left cursor-pointer">
       <span class="font-bold text-emerald-900 block">Simulado Aleatório</span>
-      <span class="text-xs text-emerald-700">10 questões sorteadas de todo o banco (${BANK.length})</span></button>`;
+      <span class="text-xs text-emerald-700">${SIZE} questões sorteadas de todo o banco (${BANK.length})</span></button>`;
   $("menu-grid").innerHTML = h;
 })();
  
@@ -205,7 +152,7 @@ function start(sim) {
   // embaralha as alternativas de cada questão
   Q = raw.map(r => ({
     cat: r[0], q: r[1], exp: r[4],
-    opts: shuffle([{ t: r[2], ok: true }, ...r[3].map(t => ({ t, ok: false }))])
+    opts: r[5] ? r[3].map(t => ({ t, ok: t === r[2] })) : shuffle([{ t: r[2], ok: true }, ...r[3].map(t => ({ t, ok: false }))])
   }));
   answers = Array(Q.length).fill(null);
   cur = 0; timeLeft = DURATION;
